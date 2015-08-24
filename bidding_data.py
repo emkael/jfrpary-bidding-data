@@ -62,6 +62,9 @@ def format_bidding(bidding):
     for bid_round in bidding:
         html_output = html_output + '<tr>'
         for bid in bid_round:
+            bid_match = re.match(r'(\d)([SHDCN])', bid)
+            if bid_match:
+		        bid = bid_match.group(1) + '<img src="images/' + bid_match.group(2) + '.gif" />'
             html_output = html_output + '<td>' + bid + '</td>'
         html_output = html_output + '</tr>'
     html_output = html_output + '</table>'
@@ -87,7 +90,7 @@ for board_no, board_data in bids.items():
             with file(bidding_file_path, 'w') as bidding_file:
                 bidding_file.write(format_bidding(bidding_table))
 
-tournament_files_match = re.compile(tournament_prefix + '([0-9]{3})\.html')
+tournament_files_match = re.compile(re.escape(tournament_prefix) + '([0-9]{3})\.html')
 tournament_files = [f for f in glob.glob(tournament_prefix + '*.html') if re.search(tournament_files_match, f)]
 
 deal_numbers = {}
@@ -106,7 +109,7 @@ for tournament_file in tournament_files:
         board_number = board_content.select('h4')[0].contents[0].strip().replace('ROZDANIE ', '')
         deal_numbers[file_number] = board_number
         board_html.seek(0)
-        board_html.write(board_content.prettify('utf-8'))
+        board_html.write(board_content.prettify('utf-8', formatter='html'))
     board_text_path = path.splitext(tournament_file)[0] + '.txt'
     with file(board_text_path, 'r+') as board_text:
         board_text_content = bs4(board_text, from_encoding='iso-8859-2')
@@ -121,4 +124,4 @@ for tournament_file in tournament_files:
                     link.extract()
                 cells[3].append(bidding_link)
         board_text.seek(0)
-        board_text.write(board_text_content.body.table.prettify('iso-8859-2'))
+        board_text.write(board_text_content.table.prettify('iso-8859-2', formatter='html'))
