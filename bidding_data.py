@@ -2,56 +2,15 @@ import csv, sys, json, glob, re
 from os import path
 from bs4 import BeautifulSoup as bs4
 
-bidding_data = []
-
-with file(sys.argv[1]) as bidding_file:
-    bidding_csv = csv.reader(bidding_file)
-    for line in bidding_csv:
-        bidding_data.append(line)
-
-sitting_data = []
-
-with file(sys.argv[2]) as sitting_file:
-    sitting_csv = csv.reader(sitting_file)
-    for line in sitting_csv:
-        sitting_data.append(line)
-
-round_lineups = {}
-
-for sitting in sitting_data[1:]:
-    round_no = int(sitting[2])
-    table_no = sitting[0] + '_' + sitting[1]
-    if not round_lineups.has_key(round_no):
-        round_lineups[round_no] = {}
-    round_lineups[round_no][table_no] = sorted([int(sitting[3]), int(sitting[4])])
-
-bids = {}
-
-for bid in bidding_data[1:]:
-    board_no = int(bid[4])
-    round_no = int(bid[3])
-    table_no = bid[1] + '_' + bid[2]
-    bid_counter = int(bid[5])
-    bid_erased = int(bid[10])
-    if not bids.has_key(board_no):
-        bids[board_no] = {}
-    if not bids[board_no].has_key(table_no):
-        bids[board_no][table_no] = {}
-    if not bids[board_no][table_no].has_key(round_no):
-        bids[board_no][table_no][round_no] = {}
-    if bid_erased == 1:
-        if bids[board_no][table_no][round_no].has_key(bid_counter):
-            if bids[board_no][table_no][round_no][bid_counter]['direction'] == bid[6]:
-                bids[board_no][table_no][round_no].pop(bid_counter, None)
-    else:
-        bids[board_no][table_no][round_no][bid_counter] = {'direction': bid[6], 'bid': bid[7] }
-
-tournament_path_prefix = sys.argv[3] + '.html'
-
-output_path = path.dirname(tournament_path_prefix)
-tournament_prefix = path.splitext(path.realpath(tournament_path_prefix))[0]
-
 directions = ['W', 'N', 'E', 'S']
+
+def csv_to_list(file_path):
+    file_data = []
+    with file(file_path) as csv_file:
+        csv_data = csv.reader(csv_file)
+        for line in csv_data:
+            file_data.append(line)
+    return file_data
 
 def format_bidding(bidding):
     html_output = '<table>'
@@ -69,6 +28,47 @@ def format_bidding(bidding):
         html_output = html_output + '</tr>'
     html_output = html_output + '</table>'
     return html_output
+
+def parse_lineup_data(sitting_data):
+    round_lineups = {}
+    for sitting in sitting_data[1:]:
+        round_no = int(sitting[2])
+        table_no = sitting[0] + '_' + sitting[1]
+        if not round_lineups.has_key(round_no):
+            round_lineups[round_no] = {}
+        round_lineups[round_no][table_no] = sorted([int(sitting[3]), int(sitting[4])])
+    return round_lineups
+
+def parse_bidding_data(bidding_data):
+    bids = {}
+    for bid in bidding_data[1:]:
+        board_no = int(bid[4])
+        round_no = int(bid[3])
+        table_no = bid[1] + '_' + bid[2]
+        bid_counter = int(bid[5])
+        bid_erased = int(bid[10])
+        if not bids.has_key(board_no):
+            bids[board_no] = {}
+        if not bids[board_no].has_key(table_no):
+            bids[board_no][table_no] = {}
+        if not bids[board_no][table_no].has_key(round_no):
+            bids[board_no][table_no][round_no] = {}
+        if bid_erased == 1:
+            if bids[board_no][table_no][round_no].has_key(bid_counter):
+                if bids[board_no][table_no][round_no][bid_counter]['direction'] == bid[6]:
+                    bids[board_no][table_no][round_no].pop(bid_counter, None)
+        else:
+            bids[board_no][table_no][round_no][bid_counter] = {'direction': bid[6], 'bid': bid[7] }
+    return bids
+
+bidding_data = csv_to_list(sys.argv[1])
+sitting_data = csv_to_list(sys.argv[2])
+round_lineups = parse_lineup_data(sitting_data)
+bids = parse_bidding_data(bidding_data)
+
+tournament_path_prefix = sys.argv[3] + '.html'
+output_path = path.dirname(tournament_path_prefix)
+tournament_prefix = path.splitext(path.realpath(tournament_path_prefix))[0]
 
 for board_no, board_data in bids.items():
     for table_no, table_data in board_data.items():
