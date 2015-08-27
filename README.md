@@ -5,7 +5,7 @@ JFR Pary - dane licytacji
 Narzędzie dodające do strony wyników z JFR Pary dane licytacji, zbierane w pliku
 BWS "pierniczkami" nowego typu.
 
-Przykładowy efekt działania: [rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html)
+Przykładowy efekt działania: [rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html).
 
 Wymagania systemowe
 -------------------
