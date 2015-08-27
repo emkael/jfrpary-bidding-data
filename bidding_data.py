@@ -30,10 +30,12 @@ class JFRBidding:
             table_no = sitting[0] + '_' + sitting[1]
             if round_no not in round_lineups:
                 round_lineups[round_no] = {}
-            round_lineups[round_no][table_no] = sorted([
-                int(sitting[3]),
-                int(sitting[4])
-            ])
+            round_lineups[round_no][table_no] = sorted(
+                [
+                    int(sitting[3]),
+                    int(sitting[4])
+                ]
+            )
         return round_lineups
 
     # converts CSV bidding to
@@ -70,24 +72,31 @@ class JFRBidding:
 
     # converts bidding data into HTML table
     def __format_bidding(self, bidding):
-        html_output = '<table>'
-        html_output = html_output + '<tr>'
-        for dir in self.__directions:
-            html_output = html_output + '<th>' + dir + '</th>'
-        html_output = html_output + '</tr>'
+        bid_match = re.compile('(\d)([SHDCN])')
+        html_output = bs4('<table>')
+        header_row = html_output.new_tag('tr')
+        html_output.table.append(header_row)
+        for direction in self.__directions:
+            header_cell = html_output.new_tag('th')
+            header_cell.string = direction
+            header_row.append(header_cell)
         for bid_round in bidding:
-            html_output = html_output + '<tr>'
+            bidding_row = html_output.new_tag('tr')
+            html_output.table.append(bidding_row)
             for bid in bid_round:
-                bid_match = re.match(r'(\d)([SHDCN])', bid)
-                if bid_match:
-                    bid = bid_match.group(1)
-                    bid = bid + '<img src="images/'
-                    bid = bid + bid_match.group(2)
-                    bid = bid + '.gif" />'
-                html_output = html_output + '<td>' + bid + '</td>'
-            html_output = html_output + '</tr>'
-        html_output = html_output + '</table>'
-        return html_output
+                bid_cell = html_output.new_tag('td')
+                call_match = re.match(bid_match, bid)
+                if call_match:
+                    bid_cell.append(call_match.group(1))
+                    bid_icon = html_output.new_tag(
+                        'img',
+                        src='images/' + call_match.group(2) + '.gif'
+                    )
+                    bid_cell.append(bid_icon)
+                else:
+                    bid_cell.append(bid)
+                bidding_row.append(bid_cell)
+        return html_output.table.prettify()
 
     # returns file path for bidding HTML output
     # {prefix}_bidding_{jfr_board_number}_{pair_numbers}.txt
@@ -230,14 +239,13 @@ class JFRBidding:
                     if script['src'] == 'javas/jquery.js'
                 ]
                 if not len(jquery_scripts):
-                    jquery_scripts.append(
-                        bs4('''
-                        <script src="javas/jquery.js"
-                                type="text/javascript">
-                        </script>
-                        ''').script
+                    jquery = board_content.new_tag(
+                        'script',
+                        src='javas/jquery.js',
+                        type='text/javascript'
                     )
-                    board_content.head.append(jquery_scripts[0])
+                    jquery_scripts.append(jquery)
+                    board_content.head.append(jquery)
                 # check for bidding.js
                 bidding_scripts = [
                     script for script
@@ -247,13 +255,12 @@ class JFRBidding:
                 # and make sure bidding.js is appended after jQuery
                 for script in bidding_scripts:
                     script.extract()
-                jquery_scripts[0].insert_after(
-                    bs4('''
-                    <script src="javas/bidding.js"
-                            type="text/javascript">
-                    </script>
-                    ''').script
+                bidding_script = board_content.new_tag(
+                    'script',
+                    src='javas/bidding.js',
+                    type='text/javascript'
                 )
+                jquery_scripts[0].insert_after(bidding_script)
                 board_html.seek(0)
                 board_html.write(board_content.prettify(
                     'utf-8',
@@ -278,14 +285,19 @@ class JFRBidding:
                     # traveller table rows for specific score entries
                     # should have 11 cells
                     if len(cells) == 11:
-                        pair_numbers = sorted([
-                            int(cells[1].contents[0]),
-                            int(cells[2].contents[0])
-                        ])
-                        bidding_link = bs4(
-                            '<a href="#" class="biddingLink">[lic]</a>'
+                        pair_numbers = sorted(
+                            [
+                                int(cells[1].contents[0]),
+                                int(cells[2].contents[0])
+                            ]
                         )
-                        bidding_link.a['data-bidding-link'] = path.basename(
+                        bidding_link = board_text_content.new_tag(
+                            'a',
+                            href='#',
+                            **{'class': 'biddingLink'}
+                        )
+                        bidding_link.string = '[lic]'
+                        bidding_link['data-bidding-link'] = path.basename(
                             self.__get_bidding_file_output_path(
                                 int(file_number, 10),
                                 pair_numbers=pair_numbers
