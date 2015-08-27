@@ -20,17 +20,17 @@ Instalacja
 1. Ściągnij zawartość tego repozytorium.
 2. W katalogu WWW Par skonfiguruj JS i CSS niezbędny do prezentacji danych
 licytacji:
-* skopiuj [css/bidding.css] do katalogu WWW
-* dołącz plik [css/bidding.css] gdzieś w arkuszach stylów turnieju
-(np. poprzez @import w kolorki.css)
-* skopiuj [js/bidding.js] do podkatalogu javas katalogu WWW (plik dołączany
+* skopiuj [`css/bidding.css`](css/bidding.css) do katalogu WWW
+* dołącz plik [`css/bidding.css`](css/bidding.css) gdzieś w arkuszach stylów turnieju
+(np. poprzez `@import` w `kolorki.css`)
+* skopiuj [`js/bidding.css`](js/bidding.css) do podkatalogu javas katalogu WWW (plik dołączany
 jest automatycznie do stron z wynikami)
 3. Już, gotowe.
 
 Użycie
 ------
 
-Skrypt [bidding_data.py](`bidding_data.py`) operuje na następujących
+Skrypt [`bidding_data.py`](bidding_data.py) operuje na następujących
 danych wejściowych:
 * plikach HTML wygenerowanych po zakończeniu turnieju stron statycznych
 * plikach CSV z danymi o licytacji i ustawieniu par, wyeksportowanymi z pliku
@@ -41,16 +41,16 @@ zawartość tabel `BiddingData` oraz `RoundData` do osobnych plików CSV.
 
 W środowiskach linuksowych dokonuje tego narzędzie `mdb-export` z pakietu
 `mdb-tools`:
-'''
+```
 mdb-export PLIK.bws BiddingData > DANE_LICYTACJI.csv
 mdb-export PLIK.bws RoundData > DANE_USTAWIENIA.csv
-'''
+```
 
-Po wygenerowaniu w/w plików CSV, [bidding_data.py](`bidding_data.py`)
+Po wygenerowaniu w/w plików CSV, [`bidding_data.py`](bidding_data.py)
 przyjmuje następujące parametry:
-'''
+```
 python bidding_data.py DANE_LICYTACJI.csv DANE_USTAWIENIA.csv KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [mapowanie numerów rozdań]
-'''
+```
 
 `DANE_LICYTACJI.csv` i `DANE_USTAWIENIA.csv` to pliki z danymi wyeskportowanymi
 z BWS.
@@ -80,7 +80,7 @@ do `*008.html` zostaną uzupełnione o licytację z rozdań 23-30.
 Lista przyszłych usprawnień
 ---------------------------
 
-Patrz: [TODO]
+Patrz: [`TODO`](TODO)
 
 Autor
 -----
@@ -90,4 +90,4 @@ Michał Klichowicz (mkl)
 Licencja
 --------
 
-Patrz: [LICENSE.md]
+Patrz: [`LICENSE.md`](LICENSE.md)
