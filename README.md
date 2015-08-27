@@ -88,7 +88,7 @@ do `*008.html` zostaną uzupełnione o licytację z rozdań 23-30.
 Lista przyszłych usprawnień
 ---------------------------
 
-Patrz: [`TODO`](TODO)
+Patrz: [`TODO.md`](TODO.md)
 
 Autor
 -----
