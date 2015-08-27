@@ -17,15 +17,17 @@ z pakietu `mdbtools`.
 Instalacja
 ----------
 
-1. Ściągnij zawartość tego repozytorium.
-2. W katalogu WWW Par skonfiguruj JS i CSS niezbędny do prezentacji danych
+Ściągnij zawartość tego repozytorium.
+
+W katalogu WWW Par skonfiguruj JS i CSS niezbędny do prezentacji danych
 licytacji:
 * skopiuj [`css/bidding.css`](css/bidding.css) do katalogu WWW
 * dołącz plik [`css/bidding.css`](css/bidding.css) gdzieś w arkuszach stylów turnieju
 (np. poprzez `@import` w `kolorki.css`)
 * skopiuj [`js/bidding.css`](js/bidding.css) do podkatalogu javas katalogu WWW (plik dołączany
 jest automatycznie do stron z wynikami)
-3. Już, gotowe.
+
+Już, gotowe.
 
 Użycie
 ------
