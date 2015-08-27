@@ -24,7 +24,7 @@ licytacji:
 * skopiuj [`css/bidding.css`](css/bidding.css) do katalogu WWW
 * dołącz plik [`css/bidding.css`](css/bidding.css) gdzieś w arkuszach stylów turnieju
 (np. poprzez `@import` w `kolorki.css`)
-* skopiuj [`js/bidding.css`](js/bidding.css) do podkatalogu javas katalogu WWW (plik dołączany
+* skopiuj [`js/bidding.js`](js/bidding.js) do podkatalogu javas katalogu WWW (plik dołączany
 jest automatycznie do stron z wynikami)
 
 Już, gotowe.
