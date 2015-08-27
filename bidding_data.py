@@ -63,6 +63,8 @@ class JFRBidding:
                             bid_counter,
                             None
                         )
+                        if len(bids[board_no][table_no][round_no]) == 0:
+                            bids[board_no][table_no].pop(round_no, None)
             else:
                 bids[board_no][table_no][round_no][bid_counter] = {
                     'direction': bid[6],
