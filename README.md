@@ -60,6 +60,12 @@ z BWS.
 `KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU` to ściezka to katalogu WWW z doklejonym
 Parowym prefiksem turnieju (czyli np. `..\www\moj_turniej`).
 
+Udostępniany ze skryptem wrapper [`bidding_data.sh`](bidding_data.sh)
+obsługuje eksport z BWS poprzez `mdb-export`, wystarczy więc:
+```
+./bidding_data.sh PLIK.bws KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [mapowanie numerów rozdań]
+```
+
 Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 
 Domyślnie, mapowanie numeru rozdań z Par na numer rozdania w BWS
@@ -76,7 +82,7 @@ Mapowanie określają, kolejno, trzy liczby:
 * numer pierwszego rozdania w BWS (zakłada się ciągłość numeracji
 w ramach mapowania)
 
-Na przykład, podanie parametrów `1 8 23` sprawi, że rozdania od `*001.html`
+Na przykład, podanie parametrów `1 8 23` sprawi, że protokoły od `*001.html`
 do `*008.html` zostaną uzupełnione o licytację z rozdań 23-30.
 
 Lista przyszłych usprawnień
