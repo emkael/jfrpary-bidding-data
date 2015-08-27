@@ -70,10 +70,17 @@ class JFRBidding:
         return html_output
 
     # returns file path for bidding HTML output
+    # {prefix}_bidding_{jfr_board_number}_{pair_numbers}.txt
     def __get_bidding_file_output_path(self, board_no, round_no=None, table_no=None, pair_numbers=None):
-        return '{0}_bidding_{1:03}_{2}.txt'.format(self.__tournament_prefix,
-                                                   board_no,
-                                                   '_'.join(map(str, self.__round_lineups[round_no][table_no] if pair_numbers is None else pair_numbers)))
+        return '{0}_bidding_{1:03}_{2}.txt'.format(
+            self.__tournament_prefix,
+            board_no,
+            '_'.join(
+                map(str,
+                    self.__round_lineups[round_no][table_no] if pair_numbers is None # read pair numbers from lineup
+                    else pair_numbers)                                               # or use numbers provided, e.g. from JFR HTML
+            )
+        )
 
     def __map_board_numbers(self, custom_mapping=None):
         self.__tournament_files = [f for f
@@ -82,6 +89,7 @@ class JFRBidding:
         if custom_mapping is not None:
             custom_files = []
             for jfr_number in range(custom_mapping[0], custom_mapping[1]+1):
+                # only include these board numbers from custom mapping which actually exist in JFP output
                 board_files = [f for f in self.__tournament_files if f.endswith('{0:03}.html'.format(jfr_number))]
                 if len(board_files):
                     self.__board_number_mapping[jfr_number - custom_mapping[0] + custom_mapping[2]] = jfr_number
@@ -89,20 +97,27 @@ class JFRBidding:
             self.__tournament_files = custom_files
         else:
             for tournament_file in self.__tournament_files:
+                # scan for all JFR board HTML files and read actual board numbers from HTML headers
                 file_number = re.match(self.__tournament_files_match, tournament_file).group(1)
                 with file(tournament_file, 'r+') as board_html:
                     board_content = bs4(board_html, from_encoding='utf-8')
-                    board_number = board_content.select('h4')[0].contents[0].strip().replace('ROZDANIE ', '')
-                    self.__board_number_mapping[int(board_number)] = int(file_number, 10)
+                    # first found <h4> element should be actual board number
+                    board_number = re.sub('[^0-9]', '', board_content.select('h4')[0].contents[0].strip())
+                    self.__board_number_mapping[int(board_number, 10)] = int(file_number, 10)
 
+    # sitting read from BWS
     __round_lineups = {}
+    # bidding read from BWS
     __bids = {}
 
+    # full path + JFR prefix
     __tournament_prefix = ''
+    # RegEx matching board HTML files
     __tournament_files_match = None
+    # matched files, including board number mapping boundaries
     __tournament_files = []
 
-    # BWS number -> JFR number
+    # BWS number -> JFR number mapping
     __board_number_mapping = {}
 
     def __init__(self, bidding_file, lineup_file, file_prefix, board_mapping):
@@ -120,14 +135,18 @@ class JFRBidding:
                         bidding = sorted(round_data)
                         dealer = round_data[bidding[0]]['direction']
                         bidding_table = [[], [], [], []]
+                        # compile bidding player-by-player
                         for bid_index in bidding:
                             bid = round_data[bid_index]
                             bidding_table[self.__directions.index(bid['direction'])].append(bid['bid'])
                             last_bidder = bid['direction']
+                        # fill skipped calls for players before dealer in the first round
                         for pos in range(0, self.__directions.index(dealer)):
                             bidding_table[pos].insert(0, '')
+                        # fill skipped calls for players after pass out (so that bidding table is a proper matrix)
                         for pos in range(self.__directions.index(last_bidder), len(self.__directions)):
                             bidding_table[pos].append('')
+                        # transpose the bidding table, align it row-by-row (bidding round-by-round)
                         bidding_table = map(list, zip(*bidding_table))
                         bidding_file_path = self.__get_bidding_file_output_path(self.__board_number_mapping[board_no], round_no, table_no)
                         with file(bidding_file_path, 'w') as bidding_file:
@@ -138,12 +157,17 @@ class JFRBidding:
             with file(tournament_file, 'r+') as board_html:
                 board_content = bs4(board_html, from_encoding='utf-8')
                 header_scripts = board_content.select('head script')
+                # check for jQuery, append if necessary
                 jquery_scripts = [script for script in header_scripts if script['src'] == 'javas/jquery.js']
                 if not len(jquery_scripts):
-                    board_content.head.append(bs4('<script src="javas/jquery.js" type="text/javascript"></script>').script)
+                    jquery_scripts.append(bs4('<script src="javas/jquery.js" type="text/javascript"></script>').script)
+                    board_content.head.append(jquery_scripts[0])
+                # check for bidding.js
                 bidding_scripts = [script for script in header_scripts if script['src'] == 'javas/bidding.js']
-                if not len(bidding_scripts):
-                    board_content.head.append(bs4('<script src="javas/bidding.js" type="text/javascript"></script>').script)
+                # and make sure bidding.js is appended after jQuery
+                for script in bidding_scripts:
+                    script.extract()
+                jquery_scripts[0].insert_after(bs4('<script src="javas/bidding.js" type="text/javascript"></script>').script)
                 board_html.seek(0)
                 board_html.write(board_content.prettify('utf-8', formatter='html'))
                 board_html.truncate()
@@ -156,6 +180,7 @@ class JFRBidding:
                 board_text_content = bs4(board_text, from_encoding='iso-8859-2')
                 for row in board_text_content.select('tr'):
                     cells = row.select('td')
+                    # traveller table rows for specific score entries should have 11 cells
                     if len(cells) == 11:
                         pair_numbers = sorted([int(cells[1].contents[0]), int(cells[2].contents[0])])
                         bidding_link = bs4('<a href="#" class="biddingLink">[lic]</a>')
@@ -163,13 +188,18 @@ class JFRBidding:
                             int(file_number, 10),
                             pair_numbers=pair_numbers
                         ))
+                        # fourth cell is the contract
                         for link in cells[3].select('a.biddingLink'):
                             link.extract()
                         cells[3].append(bidding_link)
                 board_text.seek(0)
                 board_text.write(board_text_content.table.prettify('iso-8859-2', formatter='html'))
+                board_text.truncate()
 
-bidding_parser = JFRBidding(sys.argv[1], sys.argv[2], sys.argv[3], map(int, sys.argv[4:]) if len(sys.argv) > 4 else None)
+bidding_parser = JFRBidding(bidding_file=sys.argv[1],
+                            lineup_file=sys.argv[2],
+                            file_prefix=sys.argv[3],
+                            board_mapping=map(int, sys.argv[4:]) if len(sys.argv) > 4 else None)
 bidding_parser.write_bidding_tables()
 bidding_parser.write_bidding_scripts()
 bidding_parser.write_bidding_links()
