@@ -287,12 +287,15 @@ class JFRBidding:
                     # traveller table rows for specific score entries
                     # should have 11 cells
                     if len(cells) == 11:
-                        pair_numbers = sorted(
-                            [
-                                int(cells[1].contents[0]),
-                                int(cells[2].contents[0])
-                            ]
-                        )
+                        try:
+                            pair_numbers = sorted(
+                                [
+                                    int(cells[1].contents[0]),
+                                    int(cells[2].contents[0])
+                                ]
+                            )
+                        except ValueError:
+                            continue
                         bidding_link = board_text_content.new_tag(
                             'a',
                             href='#',
