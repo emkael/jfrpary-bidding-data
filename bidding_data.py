@@ -259,10 +259,14 @@ class JFRBidding:
                             self.__get_bidding_file_output_path(
                                 int(file_number, 10),
                                 pair_numbers=pair_numbers))
-                        # fourth cell is the contract
-                        for link in cells[3].select('a.biddingLink'):
-                            link.extract()
-                        cells[3].append(bidding_link)
+                        # only append link if we've got bidding data
+                        if path.isfile(path.join(
+                                path.dirname(self.__tournament_prefix),
+                                bidding_link['data-bidding-link'])):
+                            # fourth cell is the contract
+                            for link in cells[3].select('a.biddingLink'):
+                                link.extract()
+                            cells[3].append(bidding_link)
                 board_text.seek(0)
                 board_text.write(board_text_content.table.prettify(
                     'iso-8859-2', formatter='html'))
