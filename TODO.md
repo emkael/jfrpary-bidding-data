@@ -3,4 +3,3 @@
  * niedodawanie linków tam, gdzie nie ma licytacji
  * czytać bezpośrednio z BWS (albo chociaż obsłużyć Excelowy format CSV)
  * pobieranie nazwisk z BWS(?)
- * argparse i walidacja parametrów
