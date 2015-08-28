@@ -254,7 +254,7 @@ class JFRBidding:
                             continue
                         bidding_link = board_text_content.new_tag(
                             'a', href='#', **{'class': 'biddingLink'})
-                        bidding_link.string = '[lic]'
+                        bidding_link.string = ' '
                         bidding_link['data-bidding-link'] = path.basename(
                             self.__get_bidding_file_output_path(
                                 int(file_number, 10),

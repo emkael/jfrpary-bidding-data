@@ -6,3 +6,4 @@
 }
 #bidding_popup table { width: 100%; text-align: center; }
 #bidding_popup table th { text-align: center; }
+a.biddingLink { background: url('../images/link.png') no-repeat; display: inline-block; width: 16px; height: 16px; float: right; margin: 1px 1px 1px 3px }
