@@ -79,7 +79,7 @@ pod Windowsem.
 
 Wersja operująca na wyeksportowanych plikach CSV (np. przez `mdb-export`),
 kompatybilna z pozostałymi systemami operacyjnymi i niewymagająca ODBC,
-dostępna jest w gałęzi [csv](tree/csv).
+dostępna jest w gałęzi [csv](//github.com/emkael/jfrpary-bidding-data/tree/csv).
 
 Lista przyszłych usprawnień
 ---------------------------
