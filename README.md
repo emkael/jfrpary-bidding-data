@@ -32,6 +32,7 @@ licytacji:
 (np. poprzez `@import` w `kolorki.css`)
 * skopiuj [`javas/bidding.js`](javas/bidding.js) do podkatalogu javas katalogu WWW (plik dołączany
 jest automatycznie do stron z wynikami)
+* skopiuj [`images/link.png`](images/link.png) do podkatalogu images katalogu WWW
 
 Już, gotowe.
 
