@@ -174,35 +174,41 @@ class JFRBidding:
             if board_no in self.__board_number_mapping:
                 for table_no, table_data in board_data.items():
                     for round_no, round_data in table_data.items():
-                        bidding = sorted(round_data)
-                        dealer = round_data[bidding[0]]['direction']
-                        bidding_table = [[], [], [], []]
-                        # compile bidding player-by-player
-                        for bid_index in bidding:
-                            bid = round_data[bid_index]
-                            bidding_table[
-                                self.__directions.index(bid['direction'])
-                            ].append(bid['bid'])
-                            last_bidder = bid['direction']
-                        # fill skipped calls for players before dealer
-                        # in the first round of bidding
-                        for pos in range(0, self.__directions.index(dealer)):
-                            bidding_table[pos].insert(0, '')
-                        # fill skipped calls for players after pass out
-                        # (so that bidding table is a proper matrix)
-                        for pos in range(
-                                self.__directions.index(last_bidder),
-                                len(self.__directions)):
-                            bidding_table[pos].append('')
-                        # transpose the bidding table
-                        # aligning it row-by-row (bidding round-by-round)
-                        bidding_table = map(list, zip(*bidding_table))
-                        bidding_fpath = self.__get_bidding_file_output_path(
-                            self.__board_number_mapping[board_no],
-                            round_no, table_no)
-                        with file(bidding_fpath, 'w') as bidding_file:
-                            bidding_file.write(
-                                self.__format_bidding(bidding_table))
+                        print round_no
+                        if round_no in self.__round_lineups:
+                            print table_no, self.__round_lineups[round_no]
+                            if table_no in self.__round_lineups[round_no]:
+                                bidding = sorted(round_data)
+                                dealer = round_data[bidding[0]]['direction']
+                                bidding_table = [[], [], [], []]
+                                # compile bidding player-by-player
+                                for bid_index in bidding:
+                                    bid = round_data[bid_index]
+                                    bidding_table[
+                                        self.__directions.index(bid['direction'])
+                                    ].append(bid['bid'])
+                                    last_bidder = bid['direction']
+                                # fill skipped calls for players before dealer
+                                # in the first round of bidding
+                                for pos in range(
+                                    0, self.__directions.index(dealer)):
+                                    bidding_table[pos].insert(0, '')
+                                # fill skipped calls for players after pass out
+                                # (so that bidding table is a proper matrix)
+                                for pos in range(
+                                        self.__directions.index(last_bidder),
+                                        len(self.__directions)):
+                                    bidding_table[pos].append('')
+                                # transpose the bidding table
+                                # aligning it row-by-row (bidding round-by-round)
+                                bidding_table = map(list, zip(*bidding_table))
+                                bidding_fpath = \
+                                    self.__get_bidding_file_output_path(
+                                        self.__board_number_mapping[board_no],
+                                        round_no, table_no)
+                                with file(bidding_fpath, 'w') as bidding_file:
+                                    bidding_file.write(
+                                        self.__format_bidding(bidding_table))
 
     def write_bidding_scripts(self):
         for tournament_file in self.__tournament_files:
