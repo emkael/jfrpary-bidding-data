@@ -68,7 +68,7 @@ class JFRBidding:
     # converts bidding data into HTML table
     def __format_bidding(self, bidding):
         bid_match = re.compile('(\d)([SHDCN])')
-        html_output = bs4('<table>')
+        html_output = bs4('<table>', 'lxml')
         header_row = html_output.new_tag('tr')
         html_output.table.append(header_row)
         for direction in self.__directions:
@@ -132,7 +132,8 @@ class JFRBidding:
                     self.__tournament_files_match,
                     tournament_file).group(1)
                 with file(tournament_file, 'r+') as board_html:
-                    board_content = bs4(board_html, from_encoding='utf-8')
+                    board_content = bs4(
+                        board_html, 'lxml', from_encoding='utf-8')
                     # first found <h4> element should be actual board number
                     board_number = re.sub(
                         '[^0-9]', '',
@@ -205,7 +206,7 @@ class JFRBidding:
     def write_bidding_scripts(self):
         for tournament_file in self.__tournament_files:
             with file(tournament_file, 'r+') as board_html:
-                board_content = bs4(board_html, from_encoding='utf-8')
+                board_content = bs4(board_html, 'lxml', from_encoding='utf-8')
                 header_scripts = board_content.select('head script')
                 # check for jQuery, append if necessary
                 jquery_scripts = [script for script in header_scripts
@@ -240,7 +241,7 @@ class JFRBidding:
             board_text_path = path.splitext(tournament_file)[0] + '.txt'
             with file(board_text_path, 'r+') as board_text:
                 board_text_content = bs4(
-                    board_text, from_encoding='iso-8859-2')
+                    board_text, 'lxml', from_encoding='iso-8859-2')
                 for row in board_text_content.select('tr'):
                     cells = row.select('td')
                     # traveller table rows for specific score entries

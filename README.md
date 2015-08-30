@@ -12,6 +12,7 @@ Wymagania systemowe
 
 * python 2.x (testowane i tworzone w wersji 2.7.10)
 * BeautifulSoup4
+* lxml (jako parser dla BS4)
 * argparse
 
 Opcjonalnie, wrapper Basha konwertujący dane z BWS do CSV, używa `mdb-export`
