@@ -1,7 +1,7 @@
-import csv
 import sys
 import glob
 import re
+import pypyodbc
 
 from os import path
 from bs4 import BeautifulSoup as bs4
@@ -12,40 +12,30 @@ class JFRBidding:
     # alignment of the bidding table
     __directions = ['W', 'N', 'E', 'S']
 
-    # converts csv file to list of row lists
-    def __csv_to_list(self, file_path):
-        file_data = []
-        with file(file_path) as csv_file:
-            csv_data = csv.reader(csv_file)
-            for line in csv_data:
-                file_data.append(line)
-        return file_data
-
-    # converts CSV lineup data to
+    # converts BWS lineup data to
     # {round}.{sector}_{table}.{pair numbers} structure
     def __parse_lineup_data(self, sitting_data):
         round_lineups = {}
         for sitting in sitting_data[1:]:
-            round_no = int(sitting[2])
-            table_no = sitting[0] + '_' + sitting[1]
+            round_no = sitting[2]
+            table_no = str(sitting[0]) + '_' + str(sitting[1])
             if round_no not in round_lineups:
                 round_lineups[round_no] = {}
             round_lineups[round_no][table_no] = sorted([
-                int(sitting[3]),
-                int(sitting[4])])
+                sitting[3], sitting[4]])
         return round_lineups
 
-    # converts CSV bidding to
+    # converts BWS bidding to
     # {board}.{sector}_{table}.{round}.{bidding}[] structure,
     # including erased calls
     def __parse_bidding_data(self, bidding_data):
         bids = {}
         for bid in bidding_data[1:]:
-            board_no = int(bid[4])
-            round_no = int(bid[3])
-            table_no = bid[1] + '_' + bid[2]
-            bid_counter = int(bid[5])
-            bid_erased = int(bid[10])
+            board_no = bid[4]
+            round_no = bid[3]
+            table_no = str(bid[1]) + '_' + str(bid[2])
+            bid_counter = bid[5]
+            bid_erased = bid[10]
             if board_no not in bids:
                 bids[board_no] = {}
             if table_no not in bids[board_no]:
@@ -113,14 +103,14 @@ class JFRBidding:
         if custom_mapping is None or len(custom_mapping) < 3:
             for round_data in self.__lineup_data:
                 # 13th column has JFR number for the first board
-                if len(round_data[12]):
-                    jfr_number = int(round_data[12])
+                if len(round_data) > 12:
+                    jfr_number = round_data[12]
                     if jfr_number:
                         # 5th and 6th - actual board number
-                        for board_number in range(int(round_data[5]),
-                            int(round_data[6])+1):
+                        for board_number in range(round_data[5],
+                            round_data[6]+1):
                             self.__board_number_mapping[board_number] = \
-                                jfr_number + board_number - int(round_data[5])
+                                jfr_number + board_number - round_data[5]
         else:
             for jfr_number in range(custom_mapping[0], custom_mapping[1]+1):
                 self.__board_number_mapping[
@@ -155,11 +145,13 @@ class JFRBidding:
     # BWS number -> JFR number mapping
     __board_number_mapping = {}
 
-    def __init__(self, bidding_file, lineup_file, file_prefix, board_mapping):
-        self.__lineup_data = self.__csv_to_list(lineup_file)
+    def __init__(self, bws_file, file_prefix, board_mapping):
+        connection = pypyodbc.win_connect_mdb(bws_file)
+        cursor = connection.cursor()
+        self.__lineup_data = cursor.execute('SELECT * FROM RoundData').fetchall()
         self.__round_lineups = self.__parse_lineup_data(self.__lineup_data)
         self.__bids = self.__parse_bidding_data(
-            self.__csv_to_list(bidding_file))
+            cursor.execute('SELECT * FROM BiddingData').fetchall())
         self.__tournament_prefix = path.splitext(
             path.realpath(file_prefix + '.html'))[0]
         self.__tournament_files_match = re.compile(
@@ -280,10 +272,8 @@ if __name__ == '__main__':
 
     argument_parser = argparse.ArgumentParser(
         description='Display bidding data from BWS files on JFR Pary pages')
-    argument_parser.add_argument('bidding_file', metavar='BIDDING_FILE',
-                                 help='CSV containing bidding data from BWS')
-    argument_parser.add_argument('lineup_file', metavar='LINEUP_FILE',
-                                 help='CSV containing lineup data from BWS')
+    argument_parser.add_argument('bws_file', metavar='BWS_FILE',
+                                 help='path to BWS file')
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path with JFR prefix')
     argument_parser.add_argument('board_mapping', metavar='BOARD_MAPPING',
@@ -294,8 +284,7 @@ if __name__ == '__main__':
     arguments = argument_parser.parse_args()
 
     bidding_parser = JFRBidding(
-        bidding_file=arguments.bidding_file,
-        lineup_file=arguments.lineup_file,
+        bws_file=arguments.bws_file,
         file_prefix=arguments.path,
         board_mapping=arguments.board_mapping
     )

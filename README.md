@@ -16,9 +16,7 @@ Wymagania systemowe
 * BeautifulSoup4
 * lxml (jako parser dla BS4)
 * argparse
-
-Opcjonalnie, wrapper Basha konwertujący dane z BWS do CSV, używa `mdb-export`
-z pakietu `mdbtools`.
+* pypyodbc
 
 Instalacja
 ----------
@@ -42,36 +40,17 @@ Użycie
 Skrypt [`bidding_data.py`](bidding_data.py) operuje na następujących
 danych wejściowych:
 * plikach HTML wygenerowanych po zakończeniu turnieju stron statycznych
-* plikach CSV z danymi o licytacji i ustawieniu par, wyeksportowanymi z pliku
-BWS
+* pliku BWS sesji
 
-Aby uzyskać pliki CSV niezbędne do działania narzędzia, należy zapisać całą
-zawartość tabel `BiddingData` oraz `RoundData` do osobnych plików CSV.
-
-W środowiskach linuksowych dokonuje tego narzędzie `mdb-export` z pakietu
-`mdb-tools`:
+Skrypt przyjmuje parametry w sposób następujący:
 ```
-mdb-export PLIK.bws BiddingData > DANE_LICYTACJI.csv
-mdb-export PLIK.bws RoundData > DANE_USTAWIENIA.csv
+python bidding_data.py DANE_SESJI.bws KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [mapowanie numerów rozdań]
 ```
 
-Po wygenerowaniu w/w plików CSV, [`bidding_data.py`](bidding_data.py)
-przyjmuje następujące parametry:
-```
-python bidding_data.py DANE_LICYTACJI.csv DANE_USTAWIENIA.csv KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [mapowanie numerów rozdań]
-```
-
-`DANE_LICYTACJI.csv` i `DANE_USTAWIENIA.csv` to pliki z danymi wyeskportowanymi
-z BWS.
+`DANE_SESJI.bws` to plik BWS z zebranymi danymi sesji.
 
 `KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU` to ściezka to katalogu WWW z doklejonym
 Parowym prefiksem turnieju (czyli np. `..\www\moj_turniej`).
-
-Udostępniany ze skryptem wrapper [`bidding_data.sh`](bidding_data.sh)
-obsługuje eksport z BWS poprzez `mdb-export`, wystarczy więc:
-```
-./bidding_data.sh PLIK.bws KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [mapowanie numerów rozdań]
-```
 
 Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 
@@ -91,6 +70,16 @@ w ramach mapowania)
 
 Na przykład, podanie parametrów `1 8 23` sprawi, że protokoły od `*001.html`
 do `*008.html` zostaną uzupełnione o licytację z rozdań 23-30.
+
+Kompatybilność
+--------------
+
+Narzędzie łączy się przez ODBC do bazy MSAccess, więc działa jedynie
+pod Windowsem.
+
+Wersja operująca na wyeksportowanych plikach CSV (np. przez `mdb-export`),
+kompatybilna z pozostałymi systemami operacyjnymi i niewymagająca ODBC,
+dostępna jest w gałęzi [csv](tree/csv).
 
 Lista przyszłych usprawnień
 ---------------------------
