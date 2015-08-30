@@ -8,4 +8,4 @@
 #bidding_popup table { width: 100%; text-align: center; }
 #bidding_popup table th { text-align: center; }
 a.biddingLink { background: white url('../images/link.png') no-repeat; display: inline-block; width: 16px; height: 16px; position: absolute; right: 0; margin: 1px 1px 1px 3px }
-td.nol {position:relative; height: 16px; width: 55px}
+td.nol {position:relative; min-height: 16px; min-width: 55px}
