@@ -73,11 +73,11 @@ obsługuje eksport z BWS poprzez `mdb-export`, wystarczy więc:
 Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 
 Domyślnie, mapowanie numeru rozdań z Par na numer rozdania w BWS
-(numer fizycznego pudełka), odbywa się automatycznie (na podstawie nagłówków
-plików HTML z protokołami).
+(numer fizycznego pudełka), odbywa się automatycznie (na podstawie danych z BWS).
 
-Możliwe jest jednak podanie własnego mapowania numerów rozdań (niezbędne np.
-wtedy, gdy w turnieju te same pudełka używane są więcej niż jeden raz).
+Możliwe jest jednak podanie własnego mapowania numerów rozdań (przydatne np.
+wtedy, gdy w turnieju te same pudełka używane są więcej niż jeden raz, a gdy 
+fizyczne numery rozdań używane są wiele razy w jednym BWS - wręcz niezbędne).
 
 Osiąga się to poprzez podanie dodatkowych parametrów za katalogiem roboczym.
 Mapowanie określają, kolejno, trzy liczby:

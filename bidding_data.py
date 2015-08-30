@@ -110,38 +110,35 @@ class JFRBidding:
             f for f
             in glob.glob(self.__tournament_prefix + '*.html')
             if re.search(self.__tournament_files_match, f)]
-        if custom_mapping is not None and len(custom_mapping) >= 3:
-            custom_files = []
-            for jfr_number in range(custom_mapping[0], custom_mapping[1]+1):
-                # only include these board numbers from custom mapping
-                # which actually exist in JFP output
-                board_files = [
-                    f for f
-                    in self.__tournament_files
-                    if f.endswith('{0:03}.html'.format(jfr_number))]
-                if len(board_files):
-                    self.__board_number_mapping[
-                        jfr_number - custom_mapping[0] + custom_mapping[2]
-                    ] = jfr_number
-                    custom_files = custom_files + board_files
-            self.__tournament_files = custom_files
+        if custom_mapping is None or len(custom_mapping) < 3:
+            for round_data in self.__lineup_data:
+                # 13th column has JFR number for the first board
+                if len(round_data[12]):
+                    jfr_number = int(round_data[12])
+                    if jfr_number:
+                        # 5th and 6th - actual board number
+                        for board_number in range(int(round_data[5]),
+                            int(round_data[6])+1):
+                            self.__board_number_mapping[board_number] = \
+                                jfr_number + board_number - int(round_data[5])
         else:
-            for tournament_file in self.__tournament_files:
-                # scan for all JFR board HTML files
-                # and read actual board numbers from HTML headers
-                file_number = re.match(
-                    self.__tournament_files_match,
-                    tournament_file).group(1)
-                with file(tournament_file, 'r+') as board_html:
-                    board_content = bs4(
-                        board_html, 'lxml', from_encoding='utf-8')
-                    # first found <h4> element should be actual board number
-                    board_number = re.sub(
-                        '[^0-9]', '',
-                        board_content.select('h4')[0].contents[0].strip())
-                    self.__board_number_mapping[
-                        int(board_number, 10)
-                    ] = int(file_number, 10)
+            for jfr_number in range(custom_mapping[0], custom_mapping[1]+1):
+                self.__board_number_mapping[
+                    jfr_number - custom_mapping[0] + custom_mapping[2]
+                ] = jfr_number
+        # only include these board numbers from custom mapping
+        # which actually exist in JFR output
+        custom_files = []
+        for board_number, jfr_number in self.__board_number_mapping.iteritems():
+            board_files = [
+                f for f
+                in self.__tournament_files
+                if f.endswith('{0:03}.html'.format(jfr_number))]
+            if len(board_files):
+                custom_files = custom_files + board_files
+            else:
+                self.__board_number_mapping[board_number] = None
+        self.__tournament_files = custom_files
 
     # sitting read from BWS
     __round_lineups = {}
@@ -159,8 +156,8 @@ class JFRBidding:
     __board_number_mapping = {}
 
     def __init__(self, bidding_file, lineup_file, file_prefix, board_mapping):
-        self.__round_lineups = self.__parse_lineup_data(
-            self.__csv_to_list(lineup_file))
+        self.__lineup_data = self.__csv_to_list(lineup_file)
+        self.__round_lineups = self.__parse_lineup_data(self.__lineup_data)
         self.__bids = self.__parse_bidding_data(
             self.__csv_to_list(bidding_file))
         self.__tournament_prefix = path.splitext(
