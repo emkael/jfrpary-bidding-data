@@ -174,9 +174,7 @@ class JFRBidding:
             if board_no in self.__board_number_mapping:
                 for table_no, table_data in board_data.items():
                     for round_no, round_data in table_data.items():
-                        print round_no
                         if round_no in self.__round_lineups:
-                            print table_no, self.__round_lineups[round_no]
                             if table_no in self.__round_lineups[round_no]:
                                 bidding = sorted(round_data)
                                 dealer = round_data[bidding[0]]['direction']
