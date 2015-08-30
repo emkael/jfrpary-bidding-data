@@ -3,7 +3,10 @@
 	-webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
 	-moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    z-index: 1000;
 }
 #bidding_popup table { width: 100%; text-align: center; }
 #bidding_popup table th { text-align: center; }
-a.biddingLink { background: url('../images/link.png') no-repeat; display: inline-block; width: 16px; height: 16px; float: right; margin: 1px 1px 1px 3px }
+a.biddingLink { background: white url('../images/link.png') no-repeat; display: inline-block; width: 16px; height: 16px; position: absolute; right: 0; margin: 1px 1px 1px 3px }
+td.nol {position:relative; height: 16px}
+td.nol img[alt] {margin-right: 18px}

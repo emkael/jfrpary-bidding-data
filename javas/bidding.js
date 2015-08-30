@@ -3,11 +3,11 @@ var display_bidding = function(element, bidding) {
     popup.css({
         'position': 'absolute',
         'width': '250px',
-        'left': element.position().left + element.width(),
-        'top': element.position().top
+        'left': element.offset().left + element.width(),
+        'top': element.offset().top
     });
     popup.html(bidding);
-    element.after(popup);
+    $('body').append(popup);
 }
 
 var load_bidding = function() {
