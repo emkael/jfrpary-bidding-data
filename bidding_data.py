@@ -108,7 +108,7 @@ class JFRBidding:
                     if jfr_number:
                         # 5th and 6th - actual board number
                         for board_number in range(round_data[5],
-                            round_data[6]+1):
+                                                  round_data[6]+1):
                             self.__board_number_mapping[board_number] = \
                                 jfr_number + board_number - round_data[5]
         else:
@@ -119,7 +119,7 @@ class JFRBidding:
         # only include these board numbers from custom mapping
         # which actually exist in JFR output
         custom_files = []
-        for board_number, jfr_number in self.__board_number_mapping.iteritems():
+        for b_number, jfr_number in self.__board_number_mapping.iteritems():
             board_files = [
                 f for f
                 in self.__tournament_files
@@ -127,7 +127,7 @@ class JFRBidding:
             if len(board_files):
                 custom_files = custom_files + board_files
             else:
-                self.__board_number_mapping[board_number] = None
+                self.__board_number_mapping[b_number] = None
         self.__tournament_files = custom_files
 
     # sitting read from BWS
@@ -172,13 +172,14 @@ class JFRBidding:
                                 for bid_index in bidding:
                                     bid = round_data[bid_index]
                                     bidding_table[
-                                        self.__directions.index(bid['direction'])
+                                        self.__directions.index(
+                                            bid['direction'])
                                     ].append(bid['bid'])
                                     last_bidder = bid['direction']
                                 # fill skipped calls for players before dealer
                                 # in the first round of bidding
                                 for pos in range(
-                                    0, self.__directions.index(dealer)):
+                                        0, self.__directions.index(dealer)):
                                     bidding_table[pos].insert(0, '')
                                 # fill skipped calls for players after pass out
                                 # (so that bidding table is a proper matrix)
@@ -187,7 +188,7 @@ class JFRBidding:
                                         len(self.__directions)):
                                     bidding_table[pos].append('')
                                 # transpose the bidding table
-                                # aligning it row-by-row (bidding round-by-round)
+                                # aligning it row-by-row (bid round-by-round)
                                 bidding_table = map(list, zip(*bidding_table))
                                 bidding_fpath = \
                                     self.__get_bidding_file_output_path(
