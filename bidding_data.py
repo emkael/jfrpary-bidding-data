@@ -103,7 +103,7 @@ class JFRBidding:
             '_'.join(map(str,
                          self.__round_lineups[round_no][table_no]
                          if pair_numbers is None  # read numbers from lineup
-                         else pair_numbers)))       # or use provided pair numbers
+                         else pair_numbers)))     # or use provided numbers
 
     def __map_board_numbers(self, custom_mapping=None):
         self.__tournament_files = [
@@ -115,9 +115,10 @@ class JFRBidding:
             for jfr_number in range(custom_mapping[0], custom_mapping[1]+1):
                 # only include these board numbers from custom mapping
                 # which actually exist in JFP output
-                board_files = [f for f
-                               in self.__tournament_files
-                               if f.endswith('{0:03}.html'.format(jfr_number))]
+                board_files = [
+                    f for f
+                    in self.__tournament_files
+                    if f.endswith('{0:03}.html'.format(jfr_number))]
                 if len(board_files):
                     self.__board_number_mapping[
                         jfr_number - custom_mapping[0] + custom_mapping[2]
