@@ -25,15 +25,15 @@ class JFRBidding:
                 sitting[3], sitting[4]])
         return round_lineups
 
-    # converts BWS bidding to
-    # {board}.{sector}_{table}.{round}.{bidding}[] structure,
+    # converts BWS bidding to the structure:
+    # {board}_{round}_{sector}_{table}.{sector}_{table}.{round} -> {bidding}[],
     # including erased calls
     def __parse_bidding_data(self, bidding_data):
         bids = {}
         for bid in bidding_data[1:]:
-            board_no = bid[4]
             round_no = bid[3]
             table_no = str(bid[1]) + '_' + str(bid[2])
+            board_no = str(bid[4]) + '_' + str(round_no) + '_' + table_no
             bid_counter = bid[5]
             bid_erased = bid[10]
             if board_no not in bids:
@@ -95,28 +95,28 @@ class JFRBidding:
                          if pair_numbers is None  # read numbers from lineup
                          else pair_numbers)))     # or use provided numbers
 
-    def __map_board_numbers(self, custom_mapping=None):
+    def __map_board_numbers(self):
         self.__tournament_files = [
             f for f
             in glob.glob(self.__tournament_prefix + '*.html')
             if re.search(self.__tournament_files_match, f)]
-        if custom_mapping is None or len(custom_mapping) < 3:
-            for round_data in self.__lineup_data:
-                # 13th column has JFR number for the first board
-                if len(round_data) > 12:
-                    jfr_number = round_data[12]
-                    if jfr_number:
-                        # 5th and 6th - actual board number
-                        for board_number in range(round_data[5],
-                                                  round_data[6]+1):
-                            self.__board_number_mapping[board_number] = \
-                                jfr_number + board_number - round_data[5]
-        else:
-            for jfr_number in range(custom_mapping[0], custom_mapping[1]+1):
-                self.__board_number_mapping[
-                    jfr_number - custom_mapping[0] + custom_mapping[2]
-                ] = jfr_number
-        # only include these board numbers from custom mapping
+        for round_data in self.__lineup_data:
+            # 13th column has JFR number for the first board
+            if len(round_data) > 12:
+                jfr_number = round_data[12]
+                if jfr_number:
+                    # 5th and 6th - actual board number
+                    for board_number in range(int(round_data[5]),
+                                              int(round_data[6])+1):
+                        board_string = '_'.join([
+                            str(board_number),
+                            str(round_data[2]),    # round number
+                            str(round_data[0]),    # sector number
+                            str(round_data[1])])   # table number
+                        self.__board_number_mapping[
+                            board_string] = jfr_number + board_number - \
+                                            round_data[5]
+        # only include these board numbers from mapping
         # which actually exist in JFR output
         custom_files = []
         for b_number, jfr_number in self.__board_number_mapping.iteritems():
@@ -145,7 +145,7 @@ class JFRBidding:
     # BWS number -> JFR number mapping
     __board_number_mapping = {}
 
-    def __init__(self, bws_file, file_prefix, board_mapping):
+    def __init__(self, bws_file, file_prefix):
         connection = pypyodbc.win_connect_mdb(bws_file)
         cursor = connection.cursor()
         self.__lineup_data = cursor.execute('SELECT * FROM RoundData').fetchall()
@@ -156,7 +156,7 @@ class JFRBidding:
             path.realpath(file_prefix + '.html'))[0]
         self.__tournament_files_match = re.compile(
             re.escape(self.__tournament_prefix) + '([0-9]{3})\.html')
-        self.__map_board_numbers(board_mapping)
+        self.__map_board_numbers()
 
     def write_bidding_tables(self):
         for board_no, board_data in self.__bids.items():
@@ -277,17 +277,12 @@ if __name__ == '__main__':
                                  help='path to BWS file')
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path with JFR prefix')
-    argument_parser.add_argument('board_mapping', metavar='BOARD_MAPPING',
-                                 default=[], nargs='*', type=int,
-                                 help='board number mapping ' +
-                                 '(JFR_FROM JFR_TO BWS_FROM)')
 
     arguments = argument_parser.parse_args()
 
     bidding_parser = JFRBidding(
         bws_file=arguments.bws_file,
         file_prefix=arguments.path,
-        board_mapping=arguments.board_mapping
     )
     bidding_parser.write_bidding_tables()
     bidding_parser.write_bidding_scripts()

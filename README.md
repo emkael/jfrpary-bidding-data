@@ -6,7 +6,7 @@ Narzędzie dodające do strony wyników z JFR Pary dane licytacji, zbierane w pl
 BWS "pierniczkami" nowego typu.
 
 Przykładowe efekty działania:
-[rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html), 
+[rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html),
 [Kadra U-20 z butlerem ligowym](http://emkael.info/brydz/wyniki/2015/u20_szczyrk/ligowe.html).
 
 Wymagania systemowe
@@ -44,7 +44,7 @@ danych wejściowych:
 
 Skrypt przyjmuje parametry w sposób następujący:
 ```
-python bidding_data.py DANE_SESJI.bws KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [mapowanie numerów rozdań]
+python bidding_data.py DANE_SESJI.bws KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU
 ```
 
 `DANE_SESJI.bws` to plik BWS z zebranymi danymi sesji.
@@ -54,22 +54,8 @@ Parowym prefiksem turnieju (czyli np. `..\www\moj_turniej`).
 
 Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 
-Domyślnie, mapowanie numeru rozdań z Par na numer rozdania w BWS
-(numer fizycznego pudełka), odbywa się automatycznie (na podstawie danych z BWS).
-
-Możliwe jest jednak podanie własnego mapowania numerów rozdań (przydatne np.
-wtedy, gdy w turnieju te same pudełka używane są więcej niż jeden raz, a gdy 
-fizyczne numery rozdań używane są wiele razy w jednym BWS - wręcz niezbędne).
-
-Osiąga się to poprzez podanie dodatkowych parametrów za katalogiem roboczym.
-Mapowanie określają, kolejno, trzy liczby:
-* numer pierwszego rozdania wg numeracji JFR Pary
-* numer ostatniego rozdania wg numeracji JFR Pary
-* numer pierwszego rozdania w BWS (zakłada się ciągłość numeracji
-w ramach mapowania)
-
-Na przykład, podanie parametrów `1 8 23` sprawi, że protokoły od `*001.html`
-do `*008.html` zostaną uzupełnione o licytację z rozdań 23-30.
+Mapowanie numeru rozdań z Par na numer rozdania w BWS (numer fizycznego pudełka)
+odbywa się automatycznie (na podstawie danych z BWS).
 
 Kompatybilność
 --------------
