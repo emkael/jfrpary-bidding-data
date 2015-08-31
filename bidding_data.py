@@ -2,7 +2,6 @@ import csv
 import sys
 import glob
 import re
-import json
 
 from os import path
 from bs4 import BeautifulSoup as bs4
@@ -166,7 +165,6 @@ class JFRBidding:
         self.__tournament_files_match = re.compile(
             re.escape(self.__tournament_prefix) + '([0-9]{3})\.html')
         self.__map_board_numbers()
-        print json.dumps([self.__bids, self.__board_number_mapping])
 
     def write_bidding_tables(self):
         for board_no, board_data in self.__bids.items():
