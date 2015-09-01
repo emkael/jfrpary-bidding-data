@@ -12,39 +12,49 @@ Przykładowe efekty działania:
 Wymagania systemowe
 -------------------
 
-* python 2.x (testowane i tworzone w wersji 2.7.10)
-* BeautifulSoup4
-* lxml (jako parser dla BS4)
-* argparse
-* pypyodbc
+* system opearcyjny MS Windows (testowane na Win7 i Win8.1)
+* sterownik ODBC dla plików MS Access (zwykle obecny domyślnie z Windows,
+weryfikowalny w Panelu Sterowania -> Narzędziach Administracyjnych ->
+Żródła danych ODBC)
 
 Instalacja
 ----------
 
-Ściągnij zawartość tego repozytorium.
+Ściągnij paczkę z programem, dostępną w katalogu [`bundle`](bundle) tego
+repozytorium i rozpakuj ją do wybranego przez siebie katalogu roboczego
+programu.
 
-W katalogu WWW Par skonfiguruj JS i CSS niezbędny do prezentacji danych
+W katalogu WWW Par skonfiguruj zasoby niezbędnę do prezentacji danych
 licytacji:
-* skopiuj [`css/bidding.css`](css/bidding.css) do katalogu WWW
-* dołącz plik [`css/bidding.css`](css/bidding.css) gdzieś w arkuszach stylów turnieju
-(np. poprzez `@import` w `kolorki.css`)
-* skopiuj [`javas/bidding.js`](javas/bidding.js) do podkatalogu javas katalogu WWW (plik dołączany
-jest automatycznie do stron z wynikami)
-* skopiuj [`images/link.png`](images/link.png) do podkatalogu images katalogu WWW
+* skopiuj [`css/bidding.css`](res/css/bidding.css) do katalogu WWW
+* dołącz plik [`css/bidding.css`](res/css/bidding.css) gdzieś w arkuszach
+stylów turnieju (np. poprzez `@import` w `kolorki.css`)
+* skopiuj [`javas/bidding.js`](res/javas/bidding.js) do podkatalogu javas 
+katalogu WWW (plik dołączany jest automatycznie do stron z wynikami)
+* skopiuj [`images/link.png`](res/images/link.png) do podkatalogu images
+katalogu WWW
 
 Już, gotowe.
+
+Kompilacja i praca z kodem narzędzia
+------------------------------------
+
+Patrz: [`BUILD.md`](BUILD.md)
 
 Użycie
 ------
 
-Skrypt [`bidding_data.py`](bidding_data.py) operuje na następujących
+Program skłąda się ze skompilowanego skryptu języka Python, dostępnego
+w katalogu [`src`](src) tego repozytorium.
+ 
+Skrypt [`bidding_data.py`](src/bidding_data.py) operuje na następujących
 danych wejściowych:
 * plikach HTML wygenerowanych po zakończeniu turnieju stron statycznych
 * pliku BWS sesji
 
-Skrypt przyjmuje parametry w sposób następujący:
+Program przyjmuje parametry w sposób następujący:
 ```
-python bidding_data.py DANE_SESJI.bws PLIK_TURNIEJU.html
+bidding_data.exe DANE_SESJI.bws PLIK_TURNIEJU.html
 ```
 
 `DANE_SESJI.bws` to plik BWS z zebranymi danymi sesji.
@@ -54,13 +64,13 @@ python bidding_data.py DANE_SESJI.bws PLIK_TURNIEJU.html
 
 Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 
-Mapowanie numeru rozdań z Par na numer rozdania w BWS (numer fizycznego pudełka)
-odbywa się automatycznie (na podstawie danych z BWS).
+Mapowanie numeru rozdań z Par na numer rozdania w BWS (numer fizycznego
+pudełka) odbywa się automatycznie (na podstawie danych z BWS).
 
 Kompatybilność
 --------------
 
-Narzędzie łączy się przez ODBC do bazy MSAccess, więc działa jedynie
+Narzędzie łączy się przez ODBC do bazy MS Access, więc działa jedynie
 pod Windowsem.
 
 Wersja operująca na wyeksportowanych plikach CSV (np. przez `mdb-export`),
