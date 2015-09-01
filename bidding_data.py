@@ -112,17 +112,20 @@ class JFRBidding:
             if re.search(self.__tournament_files_match, f)]
         for round_data in self.__lineup_data:
             # 13th column has JFR number for the first board
-            if len(round_data[12]):
+            if len(round_data) > 12:
                 jfr_number = int(round_data[12])
-                if jfr_number:
+                round_no = int(round_data[2])
+                sector_no = int(round_data[0])
+                table_no = int(round_data[1])
+                if jfr_number and round_no:
                     # 5th and 6th - actual board number
                     for board_number in range(int(round_data[5]),
                                               int(round_data[6])+1):
                         board_string = '_'.join([
                             str(board_number),
-                            str(round_data[2]),    # round number
-                            str(round_data[0]),    # sector number
-                            str(round_data[1])])   # table number
+                            str(round_no),
+                            str(sector_no),
+                            str(table_no)])
                         self.__board_number_mapping[
                             board_string] = jfr_number + board_number - \
                                             int(round_data[5])
