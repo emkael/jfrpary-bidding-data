@@ -58,14 +58,14 @@ mdb-export PLIK.bws RoundData > DANE_USTAWIENIA.csv
 Po wygenerowaniu w/w plików CSV, [`bidding_data.py`](bidding_data.py)
 przyjmuje następujące parametry:
 ```
-python bidding_data.py DANE_LICYTACJI.csv DANE_USTAWIENIA.csv KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU
+python bidding_data.py DANE_LICYTACJI.csv DANE_USTAWIENIA.csv PLIK_TURNIEJU.html
 ```
 
 `DANE_LICYTACJI.csv` i `DANE_USTAWIENIA.csv` to pliki z danymi wyeskportowanymi
 z BWS.
 
-`KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU` to ściezka to katalogu WWW z doklejonym
-Parowym prefiksem turnieju (czyli np. `..\www\moj_turniej`).
+`PLIK_TURNIEJU.html` to ściezka do pliku turnieju w katalogu WWW
+([ŚCIEŻKA]\PREFIX.html).
 
 Udostępniany ze skryptem wrapper [`bidding_data.sh`](bidding_data.sh)
 obsługuje eksport z BWS poprzez `mdb-export`, wystarczy więc:

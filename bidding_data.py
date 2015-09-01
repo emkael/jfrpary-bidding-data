@@ -164,7 +164,7 @@ class JFRBidding:
         self.__bids = self.__parse_bidding_data(
             self.__csv_to_list(bidding_file))
         self.__tournament_prefix = path.splitext(
-            path.realpath(file_prefix + '.html'))[0]
+            path.realpath(file_prefix))[0]
         self.__tournament_files_match = re.compile(
             re.escape(self.__tournament_prefix) + '([0-9]{3})\.html')
         self.__map_board_numbers()
@@ -283,12 +283,23 @@ if __name__ == '__main__':
 
     argument_parser = argparse.ArgumentParser(
         description='Display bidding data from BWS files on JFR Pary pages')
+
+    def file_path(filepath):
+        filepath = unicode(filepath, sys.getfilesystemencoding())
+        if path.isfile(filepath):
+            return filepath
+        else:
+            argument_parser.error('File %s does not exist' % filepath)
+
     argument_parser.add_argument('bidding_file', metavar='BIDDING_FILE',
-                                 help='CSV containing bidding data from BWS')
+                                 help='CSV containing bidding data from BWS',
+                                 type=file_path)
     argument_parser.add_argument('lineup_file', metavar='LINEUP_FILE',
-                                 help='CSV containing lineup data from BWS')
+                                 help='CSV containing lineup data from BWS',
+                                 type=file_path)
     argument_parser.add_argument('path', metavar='PATH',
-                                 help='tournament path with JFR prefix')
+                                 help='tournament path (to PREFIX.html)',
+				 type=file_path)
 
     arguments = argument_parser.parse_args()
 
