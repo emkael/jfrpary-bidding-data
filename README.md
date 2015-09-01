@@ -44,7 +44,7 @@ Patrz: [`BUILD.md`](BUILD.md)
 Użycie
 ------
 
-Program skłąda się ze skompilowanego skryptu języka Python, dostępnego
+Program składa się ze skompilowanego skryptu języka Python, dostępnego
 w katalogu [`src`](src) tego repozytorium.
  
 Skrypt [`bidding_data.py`](src/bidding_data.py) operuje na następujących
