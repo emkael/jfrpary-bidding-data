@@ -57,7 +57,7 @@ pyinstaller bidding_data.spec
 ```
 lub samodzielnie, podając odpowiednie parametry do PyInstallera:
 ```
-pyinstaller --one-file --version=[src\version](src/version) --icon=[src\icon.ico](src/icon.ico) src\bidding_data.py
+pyinstaller --one-file --version=src\version --icon=src\icon.ico src\bidding_data.py
 ```
 Zarówno metadane z pliku `src/version`, jak i ikona programu są w 100% opcjonalne.
 
