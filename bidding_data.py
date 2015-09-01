@@ -19,13 +19,13 @@ class JFRBidding:
             csv_data = csv.reader(csv_file)
             for line in csv_data:
                 file_data.append(line)
-        return file_data
+        return file_data[1:]
 
     # converts CSV lineup data to
     # {round}.{sector}_{table}.{pair numbers} structure
     def __parse_lineup_data(self, sitting_data):
         round_lineups = {}
-        for sitting in sitting_data[1:]:
+        for sitting in sitting_data:
             round_no = int(sitting[2])
             table_no = sitting[0] + '_' + sitting[1]
             if round_no not in round_lineups:
@@ -40,7 +40,7 @@ class JFRBidding:
     # including erased calls
     def __parse_bidding_data(self, bidding_data):
         bids = {}
-        for bid in bidding_data[1:]:
+        for bid in bidding_data:
             round_no = int(bid[3])
             table_no = bid[1] + '_' + bid[2]
             board_no = bid[4] + '_' + str(round_no) + '_' + table_no
