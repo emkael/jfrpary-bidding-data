@@ -117,8 +117,8 @@ class JFRBidding:
                             str(sector_no),
                             str(table_no)])
                         self.__board_number_mapping[
-                            board_string] = jfr_number + board_number - \
-                                            round_data[5]
+                            board_string
+                        ] = jfr_number + board_number - round_data[5]
         # only include these board numbers from mapping
         # which actually exist in JFR output
         custom_files = []
@@ -151,7 +151,8 @@ class JFRBidding:
     def __init__(self, bws_file, file_prefix):
         with pypyodbc.win_connect_mdb(bws_file) as connection:
             cursor = connection.cursor()
-            self.__lineup_data = cursor.execute('SELECT * FROM RoundData').fetchall()
+            self.__lineup_data = cursor.execute(
+                'SELECT * FROM RoundData').fetchall()
             bid_data = cursor.execute('SELECT * FROM BiddingData').fetchall()
         self.__round_lineups = self.__parse_lineup_data(self.__lineup_data)
         self.__bids = self.__parse_bidding_data(bid_data)
@@ -286,10 +287,10 @@ if __name__ == '__main__':
 
     argument_parser.add_argument('bws_file', metavar='BWS_FILE',
                                  help='path to BWS file',
-								 type=file_path)
+                                 type=file_path)
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path (to PREFIX.html)',
-								 type=file_path)
+                                 type=file_path)
 
     arguments = argument_parser.parse_args()
 
