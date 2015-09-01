@@ -129,6 +129,6 @@ Program obsługuje wiele rozdań o tym samym numerze w jednym BWS i mapuje
 rozdania na odpowiednie numery JFR na podstawie zestawu danych: nr stołu
 (z sektorem), nr rundy, nr pudełka rozdaniowego.
 
-~~~
+---
 
 `Hello image, sing me a line from your favourite song.`
