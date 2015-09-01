@@ -44,13 +44,13 @@ danych wejściowych:
 
 Skrypt przyjmuje parametry w sposób następujący:
 ```
-python bidding_data.py DANE_SESJI.bws KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU
+python bidding_data.py DANE_SESJI.bws PLIK_TURNIEJU.html
 ```
 
 `DANE_SESJI.bws` to plik BWS z zebranymi danymi sesji.
 
-`KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU` to ściezka to katalogu WWW z doklejonym
-Parowym prefiksem turnieju (czyli np. `..\www\moj_turniej`).
+`PLIK_TURNIEJU.html` to ściezka do pliku turnieju w katalogu WWW
+([ŚCIEŻKA]\PREFIX.html).
 
 Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 
