@@ -149,12 +149,12 @@ class JFRBidding:
     __board_number_mapping = {}
 
     def __init__(self, bws_file, file_prefix):
-        connection = pypyodbc.win_connect_mdb(bws_file)
-        cursor = connection.cursor()
-        self.__lineup_data = cursor.execute('SELECT * FROM RoundData').fetchall()
+        with pypyodbc.win_connect_mdb(bws_file) as connection:
+            cursor = connection.cursor()
+            self.__lineup_data = cursor.execute('SELECT * FROM RoundData').fetchall()
+            bid_data = cursor.execute('SELECT * FROM BiddingData').fetchall()
         self.__round_lineups = self.__parse_lineup_data(self.__lineup_data)
-        self.__bids = self.__parse_bidding_data(
-            cursor.execute('SELECT * FROM BiddingData').fetchall())
+        self.__bids = self.__parse_bidding_data(bid_data)
         self.__tournament_prefix = path.splitext(
             path.realpath(file_prefix + '.html'))[0]
         self.__tournament_files_match = re.compile(
