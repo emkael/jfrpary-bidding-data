@@ -98,7 +98,7 @@ class JFRBidding:
                                        round_no=None,
                                        table_no=None,
                                        pair_numbers=None):
-        return '{0}_bidding_{1:03}_{2}.txt'.format(
+        return u'{0}_bidding_{1:03}_{2}.txt'.format(
             self.__tournament_prefix, board_no,
             '_'.join(map(str,
                          self.__round_lineups[round_no][table_no]
