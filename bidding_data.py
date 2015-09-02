@@ -3,7 +3,7 @@ import sys
 import glob
 import re
 
-from os import path
+from os import path, remove
 from bs4 import BeautifulSoup as bs4
 
 
@@ -158,6 +158,9 @@ class JFRBidding:
     # BWS number -> JFR number mapping
     __board_number_mapping = {}
 
+    # all generated bidding table files, for cleanup purposes
+    __bidding_files = []
+
     def __init__(self, bidding_file, lineup_file, file_prefix):
         self.__lineup_data = self.__csv_to_list(lineup_file)
         self.__round_lineups = self.__parse_lineup_data(self.__lineup_data)
@@ -205,6 +208,7 @@ class JFRBidding:
                                     self.__get_bidding_file_output_path(
                                         self.__board_number_mapping[board_no],
                                         round_no, table_no)
+                                self.__bidding_files.append(bidding_fpath)
                                 with file(bidding_fpath, 'w') as bidding_file:
                                     bidding_file.write(
                                         self.__format_bidding(bidding_table))
@@ -262,10 +266,14 @@ class JFRBidding:
                         bidding_link = board_text_content.new_tag(
                             'a', href='#', **{'class': 'biddingLink'})
                         bidding_link.string = ' '
+                        bidding_path = self.__get_bidding_file_output_path(
+                            int(file_number, 10),
+                            pair_numbers=pair_numbers)
                         bidding_link['data-bidding-link'] = path.basename(
-                            self.__get_bidding_file_output_path(
-                                int(file_number, 10),
-                                pair_numbers=pair_numbers))
+                            bidding_path)
+                        if bidding_path in self.__bidding_files:
+                            del self.__bidding_files[
+                                self.__bidding_files.index(bidding_path)]
                         # only append link if we've got bidding data
                         if path.isfile(path.join(
                                 path.dirname(self.__tournament_prefix),
@@ -278,6 +286,8 @@ class JFRBidding:
                 board_text.write(board_text_content.table.prettify(
                     'iso-8859-2', formatter='html'))
                 board_text.truncate()
+        for unused_file in self.__bidding_files:
+            remove(unused_file)
 
 if __name__ == '__main__':
     import argparse
