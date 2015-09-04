@@ -97,6 +97,14 @@ Zbudowanie paczki z [`bundle`](bundle):
 * Windows PowerShell
 * .NET 4.5
 
+Znane problemy
+--------------
+
+* PyInstaller nie lubi ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
+* .NET 4.5 to .NET 4.5, nie .NET 4.5 Client Profile. W niepełnej wersji może
+nie być DLLki z System.IO.Compression.FileSystem importowanej przez skrypt
+PowerShella.
+
 Kod żródłowy
 ------------
 
