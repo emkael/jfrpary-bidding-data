@@ -2,6 +2,7 @@ import sys
 import glob
 import re
 import pypyodbc
+import logging as log
 
 from os import path, remove
 from bs4 import BeautifulSoup as bs4
@@ -308,7 +309,39 @@ if __name__ == '__main__':
                                  help='tournament path (to PREFIX.html)',
                                  type=file_path)
 
+    console_output_args = argument_parser.add_mutually_exclusive_group()
+    console_output_args.add_argument('-q', '--quiet', action='store_true',
+                                     help='suppress warning on STDERR')
+    console_output_args.add_argument('-v', '--verbose', action='store_true',
+                                     help='be verbose on STDERR')
+
+    argument_parser.add_argument('-l', '--log-level', metavar='LEVEL',
+                                 help='file logging verbosity level',
+                                 default='INFO', choices=['DEBUG',
+                                                          'INFO',
+                                                          'WARNING',
+                                                          'ERROR',
+                                                          'CRITICAL'])
+    argument_parser.add_argument('-f', '--log-file', metavar='LOGFILE',
+                                 help='log file path',
+                                 default='bidding_data.log')
+
     arguments = argument_parser.parse_args()
+
+    # primary logging facility - virtual_table.log file
+    log.basicConfig(
+        level=getattr(log, arguments.log_level),
+        format='%(asctime)s %(levelname)-8s %(name)-8s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename=arguments.log_file)
+
+    # secondary logging facility - standard error output
+    console_log = log.StreamHandler()
+    console_log.setLevel(log.INFO if arguments.verbose else (
+        log.ERROR if arguments.quiet else log.WARNING))
+    console_log.setFormatter(log.Formatter(
+        '%(levelname)-8s %(name)-8s: %(message)s'))
+    log.getLogger().addHandler(console_log)
 
     bidding_parser = JFRBidding(
         bws_file=arguments.bws_file,
