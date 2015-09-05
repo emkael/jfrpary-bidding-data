@@ -244,7 +244,7 @@ class JFRBidding:
             board_text_path = path.splitext(tournament_file)[0] + '.txt'
             with file(board_text_path, 'r+') as board_text:
                 board_text_content = bs4(
-                    board_text, 'lxml', from_encoding='iso-8859-2')
+                    board_text, 'lxml')
                 for row in board_text_content.select('tr'):
                     cells = row.select('td')
                     # traveller table rows for specific score entries
@@ -277,7 +277,7 @@ class JFRBidding:
                             cells[3].append(bidding_link)
                 board_text.seek(0)
                 board_text.write(board_text_content.table.prettify(
-                    'iso-8859-2', formatter='html'))
+                    'utf-8', formatter='html'))
                 board_text.truncate()
         for unused_file in self.__bidding_files:
             remove(unused_file)
