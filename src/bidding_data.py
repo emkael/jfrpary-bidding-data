@@ -6,6 +6,8 @@ import pypyodbc
 from os import path, remove
 from bs4 import BeautifulSoup as bs4
 
+__version__ = '1.0.1'
+
 
 class JFRBidding:
 
@@ -294,6 +296,10 @@ if __name__ == '__main__':
             return filepath
         else:
             argument_parser.error('File %s does not exist' % filepath)
+
+    argument_parser.add_argument('-V', '--version', action='version',
+                                 version='%(prog)s {version}'.format(
+                                    version=__version__))
 
     argument_parser.add_argument('bws_file', metavar='BWS_FILE',
                                  help='path to BWS file',
