@@ -19,7 +19,7 @@ class JFRBidding:
     # {round}.{sector}_{table}.{pair numbers} structure
     def __parse_lineup_data(self, sitting_data):
         round_lineups = {}
-        for sitting in sitting_data[1:]:
+        for sitting in sitting_data:
             round_no = sitting[2]
             table_no = str(sitting[0]) + '_' + str(sitting[1])
             if round_no not in round_lineups:
@@ -33,7 +33,7 @@ class JFRBidding:
     # including erased calls
     def __parse_bidding_data(self, bidding_data):
         bids = {}
-        for bid in bidding_data[1:]:
+        for bid in bidding_data:
             round_no = bid[3]
             table_no = str(bid[1]) + '_' + str(bid[2])
             board_no = str(bid[4]) + '_' + str(round_no) + '_' + table_no
