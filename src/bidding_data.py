@@ -134,7 +134,7 @@ class JFRBidding:
                 custom_files = custom_files + board_files
             else:
                 self.__board_number_mapping[b_number] = None
-        self.__tournament_files = custom_files
+        self.__tournament_files = list(set(custom_files))
 
     # sitting read from BWS
     __round_lineups = {}
