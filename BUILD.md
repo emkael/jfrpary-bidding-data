@@ -100,10 +100,13 @@ Zbudowanie paczki z [`bundle`](bundle):
 Znane problemy
 --------------
 
-* PyInstaller nie lubi ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
 * .NET 4.5 to .NET 4.5, nie .NET 4.5 Client Profile. W niepełnej wersji może
 nie być DLLki z System.IO.Compression.FileSystem importowanej przez skrypt
 PowerShella.
+* PyInstaller nie lubi kompilować ze ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
+* co więcej, wersja stabilna produkuje .exe, które nie odpala się z niektórych
+ścieżek nie-ASCII: https://github.com/pyinstaller/pyinstaller/issues/1396
+(.exe dostarczane w `dist` powinno działać)
 
 Kod żródłowy
 ------------
