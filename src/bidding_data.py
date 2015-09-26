@@ -1,3 +1,8 @@
+""" Bidding data for JFR Pary result pages.
+Utility to insert HTML tables with bidding data into traveller files generated
+by JFR Pary.
+"""
+
 import sys
 import glob
 import re
@@ -10,76 +15,96 @@ from bs4 import BeautifulSoup as bs4
 __version__ = '1.0.1'
 
 
-class JFRBidding:
+def parse_lineup_data(sitting_data):
+    """ Converts BWS lineup to dictionary structure.
+    Structure: {round}.{sector}_{table}.{pair numbers}
+    """
+    round_lineups = {}
+    for sitting in sitting_data:
+        log.getLogger('lineup').debug(sitting)
+        round_no = sitting[2] if sitting[2] is not None else 0
+        table_no = str(sitting[0]) + '_' + str(sitting[1])
+        lineup = sorted([sitting[3], sitting[4]])
+        if round_no not in round_lineups:
+            round_lineups[round_no] = {}
+        round_lineups[round_no][table_no] = lineup
+        log.getLogger('lineup').debug('round %d, table %s: %s',
+                                      round_no, table_no, lineup)
+    return round_lineups
+
+
+def parse_bidding_data(bidding_data):
+    """ Converts BWS bidding to dictionary structure.
+    Keys: {board}_{round}_{sector}_{table}.{sector}_{table}.{round}
+    Values: {bidding}[]
+    Applies erased calls
+    """
+    bids = {}
+    for bid in bidding_data:
+        log.getLogger('bidding').debug(bid)
+        round_no = bid[3]
+        table_no = str(bid[1]) + '_' + str(bid[2])
+        board_no = str(bid[4]) + '_' + str(round_no) + '_' + table_no
+        bid_counter = bid[5]
+        bid_erased = bid[10]
+        if board_no not in bids:
+            bids[board_no] = {}
+        if table_no not in bids[board_no]:
+            bids[board_no][table_no] = {}
+        if round_no not in bids[board_no][table_no]:
+            bids[board_no][table_no][round_no] = {}
+        if bid_erased == 1:
+            if bid_counter in bids[board_no][table_no][round_no]:
+                if bids[board_no][table_no][round_no][bid_counter][
+                        'direction'] == bid[6]:
+                    bids[board_no][table_no][round_no].pop(
+                        bid_counter, None)
+                    log.getLogger('bidding').debug(
+                        'erased bid %d from board %s, ' +
+                        'round %s, table %s-%s',
+                        bid_counter, *board_no.split('_'))
+                    if len(bids[board_no][table_no][round_no]) == 0:
+                        bids[board_no][table_no].pop(round_no, None)
+                        log.getLogger('bidding').debug(
+                            'bidding on board %s, round %s, ' +
+                            'table %s-%s empty, removing',
+                            *board_no.split('_'))
+                else:
+                    log.getLogger('bidding').debug(
+                        'bid does not match, not removing')
+        else:
+            bids[board_no][table_no][round_no][bid_counter] = {
+                'direction': bid[6], 'bid': bid[7]}
+            log.getLogger('bidding').debug(
+                'board %s, round %s, table %s-%s, bid %d: %s by %s',
+                *(board_no.split('_') + [bid_counter, bid[7], bid[6]]))
+    return bids
+
+def get_dealer(bidding):
+    """ Returns first player to call in a bidding.
+    """
+    return bidding[min(bidding.keys())]['direction']
+
+def get_last_bidder(bidding):
+    """ Returns last player to call in a bidding.
+    """
+    return bidding[max(bidding.keys())]['direction']
+
+
+
+
+class JFRBidding(object):
+    """ Bidding data converter (from BWS data to JFR HTML pages)
+    """
 
     # alignment of the bidding table
     __directions = ['W', 'N', 'E', 'S']
 
-    # converts BWS lineup data to
-    # {round}.{sector}_{table}.{pair numbers} structure
-    def __parse_lineup_data(self, sitting_data):
-        round_lineups = {}
-        for sitting in sitting_data:
-            log.getLogger('lineup').debug(sitting)
-            round_no = sitting[2] if sitting[2] is not None else 0
-            table_no = str(sitting[0]) + '_' + str(sitting[1])
-            lineup = sorted([sitting[3], sitting[4]])
-            if round_no not in round_lineups:
-                round_lineups[round_no] = {}
-            round_lineups[round_no][table_no] = lineup
-            log.getLogger('lineup').debug('round %d, table %s: %s',
-                                          round_no, table_no, lineup)
-        return round_lineups
-
-    # converts BWS bidding to the structure:
-    # {board}_{round}_{sector}_{table}.{sector}_{table}.{round} -> {bidding}[],
-    # including erased calls
-    def __parse_bidding_data(self, bidding_data):
-        bids = {}
-        for bid in bidding_data:
-            log.getLogger('bidding').debug(bid)
-            round_no = bid[3]
-            table_no = str(bid[1]) + '_' + str(bid[2])
-            board_no = str(bid[4]) + '_' + str(round_no) + '_' + table_no
-            bid_counter = bid[5]
-            bid_erased = bid[10]
-            if board_no not in bids:
-                bids[board_no] = {}
-            if table_no not in bids[board_no]:
-                bids[board_no][table_no] = {}
-            if round_no not in bids[board_no][table_no]:
-                bids[board_no][table_no][round_no] = {}
-            if bid_erased == 1:
-                if bid_counter in bids[board_no][table_no][round_no]:
-                    if bids[board_no][table_no][round_no][bid_counter][
-                            'direction'] == bid[6]:
-                        bids[board_no][table_no][round_no].pop(
-                            bid_counter, None)
-                        log.getLogger('bidding').debug(
-                            'erased bid %d from board %s, ' +
-                            'round %s, table %s-%s',
-                            bid_counter, *board_no.split('_'))
-                        if len(bids[board_no][table_no][round_no]) == 0:
-                            bids[board_no][table_no].pop(round_no, None)
-                            log.getLogger('bidding').debug(
-                                'bidding on board %s, round %s, ' +
-                                'table %s-%s empty, removing',
-                                *board_no.split('_'))
-                    else:
-                        log.getLogger('bidding').debug(
-                            'bid does not match, not removing')
-            else:
-                bids[board_no][table_no][round_no][bid_counter] = {
-                    'direction': bid[6], 'bid': bid[7]}
-                log.getLogger('bidding').debug(
-                    'board %s, round %s, table %s-%s, bid %d: %s by %s',
-                    *(board_no.split('_') + [bid_counter, bid[7], bid[6]]))
-        return bids
-
-    # converts bidding data into HTML table
     def __format_bidding(self, bidding):
+        """ Converts bidding data to properly formatted HTML table.
+        """
         log.getLogger('b_format').debug('formatting bidding: %s', bidding)
-        bid_match = re.compile('(\d)([SHDCN])')
+        bid_match = re.compile(r'(\d)([SHDCN])')
         html_output = bs4('<table>', 'lxml')
         header_row = html_output.new_tag('tr')
         html_output.table.append(header_row)
@@ -104,21 +129,25 @@ class JFRBidding:
             log.getLogger('b_format').debug('%5s' * 4, *bid_round)
         return html_output.table.prettify()
 
-    # returns file path for bidding HTML output
-    # {prefix}_bidding_{jfr_board_number}_{pair_numbers}.txt
     def __get_bidding_file_output_path(self,
                                        board_no,
                                        round_no=None,
                                        table_no=None,
                                        pair_numbers=None):
+        """ Compiles file path for bidding data (HTML file with bidding).
+        Path format: {prefix}_bidding_{jfr_board_number}_{pair_numbers}.txt
+        """
+        if pair_numbers is None:
+            # read numbers from lineup
+            pair_numbers = self.__round_lineups[round_no][table_no]
         return u'{0}_bidding_{1:03}_{2}.txt'.format(
             self.__tournament_prefix, board_no,
-            '_'.join(map(str,
-                         self.__round_lineups[round_no][table_no]
-                         if pair_numbers is None  # read numbers from lineup
-                         else pair_numbers)))     # or use provided numbers
+            '_'.join([str(num) for num in pair_numbers]))
 
     def __map_board_numbers(self):
+        """ Maps BWS board numbers to JFR board numbers.
+        Filters boards to these present in both sets of data.
+        """
         self.__tournament_files = [
             f for f
             in glob.glob(self.__tournament_prefix + '*.html')
@@ -166,6 +195,100 @@ class JFRBidding:
                     b_number, jfr_number)
         self.__tournament_files = list(set(custom_files))
 
+    def __compile_bidding(self, bidding):
+        """ Compiles two-dimensional bidding table from a list of calls.
+        """
+        bidding_table = [[], [], [], []]
+        # compile bidding player-by-player
+        for bid_index in sorted(bidding):
+            bid = bidding[bid_index]
+            bidding_table[
+                self.__directions.index(
+                    bid['direction'])
+            ].append(bid['bid'])
+        return bidding_table
+
+    def __form_bidding(self, bidding_table, dealer, last_bidder):
+        """ Formats bidding table in equally sized, full rows.
+        """
+        # fill skipped calls for players before dealer
+        # in the first round of bidding
+        for pos in range(
+                0, self.__directions.index(dealer)):
+            bidding_table[pos].insert(0, '')
+        # fill skipped calls for players after pass out
+        # (so that bidding table is a proper matrix)
+        for pos in range(
+                self.__directions.index(last_bidder),
+                len(self.__directions)):
+            bidding_table[pos].append('')
+        # transpose the bidding table
+        # aligning it row-by-row (bid round-by-round)
+        return [list(row) for row in zip(*bidding_table)]
+
+    def __write_bidding_file(self, board_text_path, file_number):
+        """ Alters traveller file to include links to bidding tables.
+        """
+        with file(board_text_path, 'r+') as board_text:
+            board_text_content = bs4(
+                board_text, 'lxml')
+            used_files = []
+            for row in board_text_content.select('tr'):
+                cells = row.select('td')
+                debug_string = ' '.join([
+                    ''.join([
+                        cc for cc
+                        in c.contents if isinstance(cc, basestring)]).strip()
+                    for c in cells])
+                log.getLogger('links').debug('row: %s', debug_string)
+                # traveller table rows for specific score entries
+                # should have 11 cells
+                if len(cells) == 11:
+                    try:
+                        pair_numbers = sorted([
+                            int(cells[1].contents[0]),
+                            int(cells[2].contents[0])])
+                        log.getLogger('links').debug(
+                            'pairs: %s', pair_numbers)
+                    except ValueError:
+                        log.getLogger('links').debug(
+                            'invalid pair numbers, skipping')
+                        continue
+                    bidding_link = board_text_content.new_tag(
+                        'a', href='#', **{'class': 'biddingLink'})
+                    bidding_link.string = ' '
+                    bidding_path = self.__get_bidding_file_output_path(
+                        int(file_number, 10),
+                        pair_numbers=pair_numbers)
+                    bidding_link['data-bidding-link'] = path.basename(
+                        bidding_path)
+                    # only append link if we've got bidding data
+                    if path.isfile(path.join(
+                            path.dirname(self.__tournament_prefix),
+                            bidding_link['data-bidding-link'])):
+                        if bidding_path in self.__bidding_files:
+                            used_files.append(bidding_path)
+                        log.getLogger('links').info(
+                            'linking: %s',
+                            bidding_link['data-bidding-link'])
+                        # fourth cell is the contract
+                        for link in cells[3].select('a.biddingLink'):
+                            log.getLogger('links').debug(
+                                'removing existing link')
+                            link.extract()
+                        cells[3].append(bidding_link)
+                    else:
+                        log.getLogger('links').warning(
+                            'bidding for file path %s not found',
+                            bidding_link['data-bidding-link'])
+                else:
+                    log.getLogger('links').debug('skipping row')
+            board_text.seek(0)
+            board_text.write(board_text_content.table.prettify(
+                'utf-8', formatter='html'))
+            board_text.truncate()
+            return used_files
+
     # sitting read from BWS
     __round_lineups = {}
     # bidding read from BWS
@@ -193,56 +316,39 @@ class JFRBidding:
             bid_data = cursor.execute('SELECT * FROM BiddingData').fetchall()
         log.getLogger('init').debug('parsing lineup data (%d entries)',
                                     len(self.__lineup_data))
-        self.__round_lineups = self.__parse_lineup_data(self.__lineup_data)
+        self.__round_lineups = parse_lineup_data(self.__lineup_data)
         log.getLogger('init').debug('parsing bidding data (%d entries)',
                                     len(bid_data))
-        self.__bids = self.__parse_bidding_data(bid_data)
+        self.__bids = parse_bidding_data(bid_data)
         log.getLogger('init').debug('parsing prefix, filename = %s',
                                     file_prefix)
         self.__tournament_prefix = path.splitext(
             path.realpath(file_prefix))[0]
         log.getLogger('init').debug('prefix = %s', self.__tournament_prefix)
         self.__tournament_files_match = re.compile(
-            re.escape(self.__tournament_prefix) + '([0-9]{3})\.html')
+            re.escape(self.__tournament_prefix) + r'([0-9]{3})\.html')
         log.getLogger('init').debug('tournament files pattern: %s',
                                     self.__tournament_files_match.pattern)
         self.__map_board_numbers()
 
     def write_bidding_tables(self):
+        """ Iterates over bidding and writes tables to HTML files.
+        """
         for board_no, board_data in self.__bids.items():
             if board_no in self.__board_number_mapping:
                 for table_no, table_data in board_data.items():
                     for round_no, round_data in table_data.items():
                         if round_no in self.__round_lineups:
                             if table_no in self.__round_lineups[round_no]:
-                                bidding = sorted(round_data)
-                                dealer = round_data[bidding[0]]['direction']
+                                dealer = get_dealer(round_data)
                                 log.getLogger('tables').debug(
                                     'board %s: %d bids, dealer %s',
-                                    board_no, len(bidding), dealer)
-                                bidding_table = [[], [], [], []]
-                                # compile bidding player-by-player
-                                for bid_index in bidding:
-                                    bid = round_data[bid_index]
-                                    bidding_table[
-                                        self.__directions.index(
-                                            bid['direction'])
-                                    ].append(bid['bid'])
-                                    last_bidder = bid['direction']
-                                # fill skipped calls for players before dealer
-                                # in the first round of bidding
-                                for pos in range(
-                                        0, self.__directions.index(dealer)):
-                                    bidding_table[pos].insert(0, '')
-                                # fill skipped calls for players after pass out
-                                # (so that bidding table is a proper matrix)
-                                for pos in range(
-                                        self.__directions.index(last_bidder),
-                                        len(self.__directions)):
-                                    bidding_table[pos].append('')
-                                # transpose the bidding table
-                                # aligning it row-by-row (bid round-by-round)
-                                bidding_table = map(list, zip(*bidding_table))
+                                    board_no, len(round_data), dealer)
+                                last_bidder = get_last_bidder(round_data)
+                                bidding_table = self.__compile_bidding(
+                                    round_data)
+                                bidding_table = self.__form_bidding(
+                                    bidding_table, dealer, last_bidder)
                                 log.getLogger('tables').debug(
                                     'compiled into %d rounds of bidding',
                                     len(bidding_table))
@@ -271,6 +377,8 @@ class JFRBidding:
                                              board_no)
 
     def write_bidding_scripts(self):
+        """ Alters traveller files to include necessary JavaScript.
+        """
         for tournament_file in self.__tournament_files:
             log.getLogger('scripts').info('writing scripts into: %s',
                                           tournament_file)
@@ -306,6 +414,10 @@ class JFRBidding:
                 board_html.truncate()
 
     def write_bidding_links(self):
+        """ Iterates over traveller files to include links to bidding tables.
+        Cleans up bidding table files, which are not used.
+        """
+        used_bidding_tables = []
         for tournament_file in self.__tournament_files:
             file_number = re.match(
                 self.__tournament_files_match,
@@ -313,76 +425,28 @@ class JFRBidding:
             board_text_path = path.splitext(tournament_file)[0] + '.txt'
             log.getLogger('links').info('writing traveller for board %s: %s',
                                         file_number, board_text_path)
-            with file(board_text_path, 'r+') as board_text:
-                board_text_content = bs4(
-                    board_text, 'lxml')
-                for row in board_text_content.select('tr'):
-                    cells = row.select('td')
-                    debug_string = ' '.join(map(
-                        lambda c: ''.join(filter(
-                            lambda cc: isinstance(cc, basestring),
-                            c.contents)).strip(),
-                        cells))
-                    log.getLogger('links').debug('row: %s', debug_string)
-                    # traveller table rows for specific score entries
-                    # should have 11 cells
-                    if len(cells) == 11:
-                        try:
-                            pair_numbers = sorted([
-                                int(cells[1].contents[0]),
-                                int(cells[2].contents[0])])
-                            log.getLogger('links').debug(
-                                'pairs: %s', pair_numbers)
-                        except ValueError:
-                            log.getLogger('links').debug(
-                                'invalid pair numbers, skipping')
-                            continue
-                        bidding_link = board_text_content.new_tag(
-                            'a', href='#', **{'class': 'biddingLink'})
-                        bidding_link.string = ' '
-                        bidding_path = self.__get_bidding_file_output_path(
-                            int(file_number, 10),
-                            pair_numbers=pair_numbers)
-                        bidding_link['data-bidding-link'] = path.basename(
-                            bidding_path)
-                        # only append link if we've got bidding data
-                        if path.isfile(path.join(
-                                path.dirname(self.__tournament_prefix),
-                                bidding_link['data-bidding-link'])):
-                            if bidding_path in self.__bidding_files:
-                                del self.__bidding_files[
-                                    self.__bidding_files.index(bidding_path)]
-                            log.getLogger('links').info(
-                                'linking: %s',
-                                bidding_link['data-bidding-link'])
-                            # fourth cell is the contract
-                            for link in cells[3].select('a.biddingLink'):
-                                log.getLogger('links').debug(
-                                    'removing existing link')
-                                link.extract()
-                            cells[3].append(bidding_link)
-                        else:
-                            log.getLogger('links').warning(
-                                'bidding for file path %s not found',
-                                bidding_link['data-bidding-link'])
-                    else:
-                        log.getLogger('links').debug('skipping row')
-                board_text.seek(0)
-                board_text.write(board_text_content.table.prettify(
-                    'utf-8', formatter='html'))
-                board_text.truncate()
-        for unused_file in self.__bidding_files:
+            used_bidding_tables = self.__write_bidding_file(
+                board_text_path, file_number) + used_bidding_tables
+            log.getLogger('links').info('used board files: %s',
+                                        ', '.join(used_bidding_tables))
+        for unused_file in [unused for unused
+                            in self.__bidding_files
+                            if unused not in used_bidding_tables]:
             log.getLogger('links').warning(
                 'bidding file %s not used, deleting', unused_file)
             remove(unused_file)
 
-if __name__ == '__main__':
+def main():
+    """ Program entry point, invoked when __name__ is __main__
+    """
     import argparse
 
     argument_parser = argparse.ArgumentParser(
         description='Display bidding data from BWS files on JFR Pary pages')
 
     def file_path(filepath):
+        """ Sanitizes and validates file paths from input parameters.
+        """
         filepath = unicode(filepath, sys.getfilesystemencoding())
         if path.isfile(filepath):
             return filepath
@@ -391,7 +455,7 @@ if __name__ == '__main__':
 
     argument_parser.add_argument('-V', '--version', action='version',
                                  version='%(prog)s {version}'.format(
-                                    version=__version__))
+                                     version=__version__))
 
     argument_parser.add_argument('bws_file', metavar='BWS_FILE',
                                  help='path to BWS file',
@@ -445,7 +509,11 @@ if __name__ == '__main__':
         bidding_parser.write_bidding_tables()
         bidding_parser.write_bidding_scripts()
         bidding_parser.write_bidding_links()
-    except Exception as e:
-        log.getLogger('root').error(e.strerror)
+    except Exception as ex:
+        log.getLogger('root').error(ex.strerror)
+        raise
 
     log.info('--------- program ended ---------')
+
+if __name__ == '__main__':
+    main()
