@@ -80,17 +80,17 @@ def parse_bidding_data(bidding_data):
                 *(board_no.split('_') + [bid_counter, bid[7], bid[6]]))
     return bids
 
+
 def get_dealer(bidding):
     """ Returns first player to call in a bidding.
     """
     return bidding[min(bidding.keys())]['direction']
 
+
 def get_last_bidder(bidding):
     """ Returns last player to call in a bidding.
     """
     return bidding[max(bidding.keys())]['direction']
-
-
 
 
 class JFRBidding(object):
@@ -435,6 +435,7 @@ class JFRBidding(object):
             log.getLogger('links').warning(
                 'bidding file %s not used, deleting', unused_file)
             remove(unused_file)
+
 
 def main():
     """ Program entry point, invoked when __name__ is __main__
