@@ -24,12 +24,15 @@ Instalacja
 repozytorium i rozpakuj ją do wybranego przez siebie katalogu roboczego
 programu.
 
+Uwaga: paczki z sufiksem `-gui` zawierają wersję aplikacji z okienkowym
+interfejsem graficznym.
+
 W katalogu WWW Par skonfiguruj zasoby niezbędnę do prezentacji danych
 licytacji:
 * skopiuj [`css/bidding.css`](res/css/bidding.css) do katalogu WWW
 * dołącz plik [`css/bidding.css`](res/css/bidding.css) gdzieś w arkuszach
 stylów turnieju (np. poprzez `@import` w `kolorki.css`)
-* skopiuj [`javas/bidding.js`](res/javas/bidding.js) do podkatalogu javas 
+* skopiuj [`javas/bidding.js`](res/javas/bidding.js) do podkatalogu javas
 katalogu WWW (plik dołączany jest automatycznie do stron z wynikami)
 * skopiuj [`images/link.png`](res/images/link.png) do podkatalogu images
 katalogu WWW
@@ -41,12 +44,12 @@ Kompilacja i praca z kodem narzędzia
 
 Patrz: [`BUILD.md`](BUILD.md)
 
-Użycie
-------
+Użycie (wersja linii poleceń)
+-----------------------------
 
 Program składa się ze skompilowanego skryptu języka Python, dostępnego
 w katalogu [`src`](src) tego repozytorium.
- 
+
 Skrypt [`bidding_data.py`](src/bidding_data.py) operuje na następujących
 danych wejściowych:
 * plikach HTML wygenerowanych po zakończeniu turnieju stron statycznych
@@ -67,6 +70,11 @@ Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 Mapowanie numeru rozdań z Par na numer rozdania w BWS (numer fizycznego
 pudełka) odbywa się automatycznie (na podstawie danych z BWS).
 
+Użycie (wersja z interfejsem okienkowym)
+----------------------------------------
+
+Się klika, się wybiera i się robi.
+
 Kompatybilność
 --------------
 
@@ -76,6 +84,8 @@ pod Windowsem.
 Wersja operująca na wyeksportowanych plikach CSV (np. przez `mdb-export`),
 kompatybilna z pozostałymi systemami operacyjnymi i niewymagająca ODBC,
 dostępna jest w gałęzi [csv](//github.com/emkael/jfrpary-bidding-data/tree/csv).
+
+Do wersji z gałęzi CSV nie ma interfejsu graficznego.
 
 Lista przyszłych usprawnień
 ---------------------------

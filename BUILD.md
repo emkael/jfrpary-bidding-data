@@ -8,6 +8,7 @@ Struktura repozytorium kodu
 Katalog [`src`](src) zawiera komponenty źródłowe programu:
 
 * [kod skryptu Pythona](src/bidding_data.py), który wykonuje całą robotę
+* [kod skryptu pakującego program w interfejs graficzny](src/bidding_data_gui.py)
 * [ikonę programu](src/icon.ico) wraz ze [źródłami](src/icon.xcf)
 * [metadane programu](src/version) dla PyInstallera
 
@@ -76,6 +77,13 @@ który, kolejno:
 * tworzy z nich nazwę dla paczki
 * pakuje cały katalog `dist` do paczki i umieszcza ją w `bundle`
 
+---
+
+Analogiczny proces dla interfejsu graficznego polega na podmianie skryptu
+źródłowego z src/bidding_data.py na src/bidding_data_gui.py (dołącza sobie
+bidding_data.py jako moduł) i wywołanie pyinstallera z opcją aplikacji
+okienkowej.
+
 Wymagania systemowe
 -------------------
 
@@ -97,6 +105,10 @@ Zbudowanie paczki z [`bundle`](bundle):
 * Windows PowerShell
 * .NET 4.5
 
+Interfejs graficzny (dodatkowo):
+
+* Tkinter
+
 Znane problemy
 --------------
 
@@ -104,8 +116,9 @@ Znane problemy
 nie być DLLki z System.IO.Compression.FileSystem importowanej przez skrypt
 PowerShella.
 * PyInstaller nie lubi kompilować ze ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
-* co więcej, wersja stabilna produkuje .exe, które nie odpala się z niektórych
-ścieżek nie-ASCII: https://github.com/pyinstaller/pyinstaller/issues/1396
+* co więcej, jego wersja stabilna produkuje .exe, które nie odpala się
+z niektórych ścieżek nie-ASCII:
+https://github.com/pyinstaller/pyinstaller/issues/1396
 (.exe dostarczane w `dist` powinno działać)
 
 Kod żródłowy
