@@ -23,6 +23,7 @@ class BiddingGUI(tk.Frame):
         self.set_icon(self.master)
 
     def set_icon(self, master):
+        #pylint: disable=protected-access
         img = tk.PhotoImage(data=self.__icon_data, master=master)
         master.tk.call('wm', 'iconphoto', master._w, img)
 
@@ -50,6 +51,26 @@ class BiddingGUI(tk.Frame):
 
             self.text.after(0, append)
 
+        def handle(self, record):
+            log.Handler.handle(self, record)
+            if record.levelname == 'WARNING':
+                self.__warning_count += 1
+            if record.levelname == 'ERROR':
+                self.__error_count += 1
+
+        __warning_count = 0
+        __error_count = 0
+
+        def warnings(self):
+            return self.__warning_count
+
+        def errors(self):
+            return self.__error_count
+
+        def reset_counts(self):
+            self.__warning_count = 0
+            self.__error_count = 0
+
     def run_bidding_data(self):
         try:
             self.log_field.delete(1.0, tk.END)
@@ -57,6 +78,7 @@ class BiddingGUI(tk.Frame):
                 raise Exception('BWS file not found')
             if not os.path.exists(self.__tour_filename.get()):
                 raise Exception('Tournament results file not found')
+            self.__gui_logger.reset_counts()
             from bidding_data import JFRBidding
             parser = JFRBidding(
                 bws_file=self.__bws_filename.get(),
@@ -64,6 +86,18 @@ class BiddingGUI(tk.Frame):
             parser.write_bidding_tables()
             parser.write_bidding_scripts()
             parser.write_bidding_links()
+            if self.__gui_logger.errors():
+                tkMessageBox.showerror(
+                    'Błąd!',
+                    ('Podczas wykonywania programu wystąpiły błędy ' +
+                     'w liczbie: %d\n' +
+                     'Sprawdź dziennik logów') % self.__gui_logger.errors())
+            elif self.__gui_logger.warnings():
+                tkMessageBox.showwarning(
+                    'Błąd!',
+                    ('Podczas wykonywania programu wystąpiły ostrzeżenia ' +
+                     'w liczbie: %d\n' +
+                     'Sprawdź dziennik logów') % self.__gui_logger.warnings())
         except Exception as ex:
             log.getLogger('root').error(ex)
             tkMessageBox.showerror('Błąd!', ex)
@@ -141,6 +175,7 @@ TcWOCBBLr3o2YwEDeff06JMhFy5cvgrdo8QFX+EKCY3SAmGGcRQYsQ5o7X0xiRIgLVBS1MLiQ4Ebw7Qo
 JBobCQ8uTFiiAaASwAv1iOG3y69fvZgeO/wAGGCANAgAwAFm2NVWbbYQAUshOMdmBSCRCXGUAHjslIYI
 ZBsjxElQuRHJGa1cp8MdLXUVCxwJKoAQVAnkcQmIDDMgQ0iOMMALJETrluIghG5SgCG2f1SFIJDBcxcA
 PKMWxAQccTOBAB1BWyYEURCLYmBMmMLVggl4WVEUkjZRp5plopmlmJFUcRQFwcB5GwT8BAQA7"""
+
 
 def main():
     app = BiddingGUI()
