@@ -17,13 +17,20 @@ class BiddingGUI(tk.Frame):
         tk.Frame.__init__(self, master)
         self.__tour_filename = tk.StringVar(master=self)
         self.__bws_filename = tk.StringVar(master=self)
-        self.grid()
-        self.create_widgets()
         self.master.title('JBBD - JFR/BWS bidding data')
         self.set_icon(self.master)
+        self.create_widgets()
+        self.configure_grid_cells([1], [3])
+        self.pack(expand=1, fill=tk.BOTH)
+
+    def configure_grid_cells(self, columns, rows):
+        for column in columns:
+            self.columnconfigure(column, weight=1)
+        for row in rows:
+            self.rowconfigure(row, weight=1)
 
     def set_icon(self, master):
-        #pylint: disable=protected-access
+        # pylint: disable=protected-access
         img = tk.PhotoImage(data=self.__icon_data, master=master)
         master.tk.call('wm', 'iconphoto', master._w, img)
 
@@ -110,7 +117,7 @@ class BiddingGUI(tk.Frame):
             self, state=tk.DISABLED, textvariable=self.__tour_filename)
         tour_select_btn = tk.Button(
             self, text='Szukaj', command=self.tour_select)
-        tour_label.grid(row=0, column=0)
+        tour_label.grid(row=0, column=0, sticky=tk.E)
         tour_entry.grid(row=0, column=1, columnspan=4, sticky=tk.E+tk.W)
         tour_select_btn.grid(row=0, column=5)
 
@@ -120,7 +127,7 @@ class BiddingGUI(tk.Frame):
             self, state=tk.DISABLED, textvariable=self.__bws_filename)
         bws_select_btn = tk.Button(
             self, text='Szukaj', command=self.bws_select)
-        bws_label.grid(row=1, column=0)
+        bws_label.grid(row=1, column=0, sticky=tk.E)
         bws_entry.grid(row=1, column=1, columnspan=4, sticky=tk.E+tk.W)
         bws_select_btn.grid(row=1, column=5)
 
@@ -140,7 +147,8 @@ class BiddingGUI(tk.Frame):
             yscrollcommand=log_scroll_y.set)
         log_scroll_x['command'] = self.log_field.xview
         log_scroll_y['command'] = self.log_field.yview
-        self.log_field.grid(row=3, column=0, columnspan=6, sticky=tk.E+tk.W)
+        self.log_field.grid(
+            row=3, column=0, columnspan=6, sticky=tk.N+tk.S+tk.E+tk.W)
         log_scroll_y.grid(row=3, column=6, sticky=tk.N+tk.S)
         log_scroll_x.grid(row=4, column=0, columnspan=6, sticky=tk.E+tk.W)
 
