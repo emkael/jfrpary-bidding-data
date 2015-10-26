@@ -120,26 +120,27 @@ class BiddingGUI(tk.Frame):
         log.getLogger().addHandler(self.__gui_logger)
         log.getLogger().removeHandler(log.getLogger().handlers[0])
 
-    __icon_data = """iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/
-AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3woaDDQU8kJ17gAAABl0RVh0Q29tbWVu
-dABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAP/SURBVFjD7ZdfTFNXGMB/bS+3LRUqf8xmFjPmQsAphuxh
-kajhZWYkm/oCCSYo4wFeXIIz3ZbBdFGXsQWy+CBZnC8GQxqjWWIFs7hEp2MxCBpklbSQsbBRig6CbWnp
-9XJ79kCphQAtrrg97CRfcnPOd+73y3e+P+cgy/LrmZmZHkAkEkmSRE5OzjekcmRmZo4mYzxe8vMLDqXK
-vuT3+18BKCp6h7KyjzEaLUsq+nzj2O0fMjHxO0ND7s2pAtDPf5SVfYQQEVQ1iKoGCYcDMVGUAEajhV27
-3ifVIwYgyxYkSU9n50Nu3BhcoDQ6+gQAiyVr7QB0Oujr8/DoUQCDYW7aYNBz7doADocTTYsgBGsHMDkZ
-pLf3D/bu3RYzfvWqk4EBL8HgU86e/QWdbg0Brlz5lbQ0Ax0dD+nvH8Pnm2FgwANAerpMKDSD1+ufV59t
-bm5OCYAumlqcPHkXVQ0xOvqEwcHH7Ny5mcnJIJom8HimWL/egsn0mAsXPqCwsNDtcrkKW1pasNls/ywN
-5z8URUNRVPR6HVarmUhEIAT09IwwM6NSVGTEZJrTdblcBcXFxfdtNtsxQH4ewwUFBRNut/vnmAcaG++g
-KNMrbjIaLZw+/S7B4FRK3J+dnf15DKC9fYhQKJBwk8Eg4XCcIhwOPJdRRVHo6upCVVVkec55AhAvcnR3
-d8fKeswDYi2SfKXoj+a0nn95SKn8mdcbwO9XyM42s2GDJel9S8bA7KwmWlvvCJutU4yN+ZM62wMH7AI+
-EWATPT1/rqgb196fAdy8+ZuYmgoJIYSorLQL+DQqR8WtW8MJAaqqLoqNG78Ux4//KOCouHSpPyGAfnFg
-3Ls3BkBvrye+AlBa2srISOL8V1WNEyfe5syZcioq2mhq+im5XgBgMkkcOdIBwMGDxUAkblUmL+8rXK6/
-kjrXw4dLuH69joaGH6iuvpwcAIDT6SEt7TO2b3+Z2tq35o9pvgyxZUsz+/a1MT2tJITYsycft9uG3d7H
-7t3fLZnq+qVi8vbtWkpLN3Pu3N1ov3q2tmPHazgch1i3zkgkIlBVDVXVEEIQiYgFR6GqGnl5WYyPN/Dg
-gZdNm74mHJ5dPg0jEUFT03uUlLxKScm3i/gE1dVvcv58RWymre0+NTXtgCHqKQnQo9PZFoHPeS8QUKip
-uYzdXrk0QCikUl6+LdYd443v3//GAuMAZnMaGRlWJGkONBh8iqpGyMqyLnt7ysgwJlcHnM5xIUmNwmQ6
-Jurqvk+qDlRVXRS5uaeS0o29NZYLoK1bX0JVv1hVJZRlA+npq7se/N+M/jsA9fX1AGiatqYSbytafk3D
-q32cpkpMJtOwTpblHLPZPOHz+V6o661WK0ajMfdv7mF1hk5b7XQAAAAASUVORK5CYII="""
+    __icon_data = """R0lGODlhIAAgAOeRAAAAAAQEBAUFBQYGBggICAAAcQAAcgAAcwAAdAAAdQA
+AdgAAdwAAeAAAeQEBegsLEQQEewUFew4ODgYGfA8PDwgIfQoKfgoKfxMTEwsLfxQUIQ0NgBERghISghQ
+UgxQUhBUVhRYWhhkZhhkZhxoajxsbhx4eiSgoKCIijCQkjC0tRzAwMCoqkSsrkSwskCwskjExkzU1lzg
+4ljg4mUFBQTs7mjw8mUJChEhISEVFn0hIolBQVUpKo01NoVBQgU9Pok9PplVVqlhYp1pakllZp1lZq1t
+bklpaqF1dlFxcqV5eq19fqmBgsGFhsGJirGJisWNjsWVlrWVlrmZmrmhotG5ubmlpvG1tsHFxuXR0tXR
+0u3V1u3V1vHV1vXZ2vHd3vXh4vXt7xnt7x3x8x3x8yH19wH5+u4GBvIKCyoaGv4eHwJSUxpWVx5ubzp6
+e0p+fzKWl26io0aur0q+v1Lq62ry83L+/3cDA3sHB3sbG4MbG4cnJycjI4svL49TU6NfX6tjY69nZ69v
+b7ODg7ubm8urq9O3t9e7u9u/v9vPz+Pf3+/n5/Pr6/Pz8/Pz8/f39/v7+/v/////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////yH5BAEKAP8ALAAAAAAgACAAQAj+AP9JAECwYMEAGP4pXMiwIUOCaMo0qeE
+FCpMcQZAAOOGwY0OCkUJGcsQmCyGRKEMSWYCgT8qQBlH6gVBhykuRSTzchFlQDJgXMbQILaLFCEGPSP+
+B3MmU6Z6YfBJAmBOFQYOrCXokQplTZKAINiDxXNq0bEqDKrqQWcv2ioajSTsStPLhyYwvLKxaMAogrlw
+AYoQKFhzmgcHDiAsqBWC2sciYd+pESnG1wYFBN7uuQZDmbMFIetREklGZwRKRbwogOLDAMoLXCFoLiRT
+TcWOCBBLr3o2YwEDeff06JMhFy5cvgrdo8QFX+EKCY3SAmGGcRQYsQ5o7X0xiRIgLVBS1MLiQ4Ebw7Qo
+JBobCQ8uTFiiAaASwAv1iOG3y69fvZgeO/wAGGCANAgAwAFm2NVWbbYQAUshOMdmBSCRCXGUAHjslIYI
+ZBsjxElQuRHJGa1cp8MdLXUVCxwJKoAQVAnkcQmIDDMgQ0iOMMALJETrluIghG5SgCG2f1SFIJDBcxcA
+PKMWxAQccTOBAB1BWyYEURCLYmBMmMLVggl4WVEUkjZRp5plopmlmJFUcRQFwcB5GwT8BAQA7"""
 
 def main():
     app = BiddingGUI()
