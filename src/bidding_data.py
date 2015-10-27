@@ -98,7 +98,6 @@ def get_last_bidder(bidding):
 
 
 class JFRBidding(object):
-
     """Bidding data converter (from BWS data to JFR HTML pages)."""
 
     # alignment of the bidding table
