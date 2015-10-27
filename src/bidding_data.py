@@ -1,4 +1,6 @@
-""" Bidding data for JFR Pary result pages.
+"""
+Bidding data for JFR Pary result pages.
+
 Utility to insert HTML tables with bidding data into traveller files generated
 by JFR Pary.
 """
@@ -16,7 +18,9 @@ __version__ = '1.0.1'
 
 
 def parse_lineup_data(sitting_data):
-    """ Converts BWS lineup to dictionary structure.
+    """
+    Convert BWS lineup to dictionary structure.
+
     Structure: {round}.{sector}_{table}.{pair numbers}
     """
     round_lineups = {}
@@ -34,10 +38,12 @@ def parse_lineup_data(sitting_data):
 
 
 def parse_bidding_data(bidding_data):
-    """ Converts BWS bidding to dictionary structure.
+    """
+    Convert BWS bidding to dictionary structure.
+
     Keys: {board}_{round}_{sector}_{table}.{sector}_{table}.{round}
     Values: {bidding}[]
-    Applies erased calls
+    Applies call erasures.
     """
     bids = {}
     for bid in bidding_data:
@@ -82,27 +88,23 @@ def parse_bidding_data(bidding_data):
 
 
 def get_dealer(bidding):
-    """ Returns first player to call in a bidding.
-    """
+    """Return first player to call in a bidding."""
     return bidding[min(bidding.keys())]['direction']
 
 
 def get_last_bidder(bidding):
-    """ Returns last player to call in a bidding.
-    """
+    """Return last player to call in a bidding."""
     return bidding[max(bidding.keys())]['direction']
 
 
 class JFRBidding(object):
-    """ Bidding data converter (from BWS data to JFR HTML pages)
-    """
+    """Bidding data converter (from BWS data to JFR HTML pages)."""
 
     # alignment of the bidding table
     __directions = ['W', 'N', 'E', 'S']
 
     def __format_bidding(self, bidding):
-        """ Converts bidding data to properly formatted HTML table.
-        """
+        """Convert bidding data to properly formatted HTML table."""
         log.getLogger('b_format').debug('formatting bidding: %s', bidding)
         bid_match = re.compile(r'(\d)([SHDCN])')
         html_output = bs4('<table>', 'lxml')
@@ -134,7 +136,9 @@ class JFRBidding(object):
                                        round_no=None,
                                        table_no=None,
                                        pair_numbers=None):
-        """ Compiles file path for bidding data (HTML file with bidding).
+        """
+        Compile file path for bidding data (HTML file with bidding).
+
         Path format: {prefix}_bidding_{jfr_board_number}_{pair_numbers}.txt
         """
         if pair_numbers is None:
@@ -145,7 +149,9 @@ class JFRBidding(object):
             '_'.join([str(num) for num in pair_numbers]))
 
     def __map_board_numbers(self):
-        """ Maps BWS board numbers to JFR board numbers.
+        """
+        Map BWS board numbers to JFR board numbers.
+
         Filters boards to these present in both sets of data.
         """
         self.__tournament_files = [
@@ -196,8 +202,7 @@ class JFRBidding(object):
         self.__tournament_files = list(set(custom_files))
 
     def __compile_bidding(self, bidding):
-        """ Compiles two-dimensional bidding table from a list of calls.
-        """
+        """Compile two-dimensional bidding table from a list of calls."""
         bidding_table = [[], [], [], []]
         # compile bidding player-by-player
         for bid_index in sorted(bidding):
@@ -209,8 +214,7 @@ class JFRBidding(object):
         return bidding_table
 
     def __form_bidding(self, bidding_table, dealer, last_bidder):
-        """ Formats bidding table in equally sized, full rows.
-        """
+        """Format bidding table in equally sized, full rows."""
         # fill skipped calls for players before dealer
         # in the first round of bidding
         for pos in range(
@@ -227,8 +231,7 @@ class JFRBidding(object):
         return [list(row) for row in zip(*bidding_table)]
 
     def __write_bidding_file(self, board_text_path, file_number):
-        """ Alters traveller file to include links to bidding tables.
-        """
+        """Alter traveller file to include links to bidding tables."""
         with file(board_text_path, 'r+') as board_text:
             board_text_content = bs4(
                 board_text, 'lxml')
@@ -308,6 +311,7 @@ class JFRBidding(object):
     __bidding_files = []
 
     def __init__(self, bws_file, file_prefix):
+        """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
         with pypyodbc.win_connect_mdb(bws_file) as connection:
             cursor = connection.cursor()
@@ -332,8 +336,7 @@ class JFRBidding(object):
         self.__map_board_numbers()
 
     def write_bidding_tables(self):
-        """ Iterates over bidding and writes tables to HTML files.
-        """
+        """Iterate over bidding and writes tables to HTML files."""
         for board_no, board_data in self.__bids.items():
             if board_no in self.__board_number_mapping:
                 for table_no, table_data in board_data.items():
@@ -377,8 +380,7 @@ class JFRBidding(object):
                                              board_no)
 
     def write_bidding_scripts(self):
-        """ Alters traveller files to include necessary JavaScript.
-        """
+        """Alter traveller files to include necessary JavaScript."""
         for tournament_file in self.__tournament_files:
             log.getLogger('scripts').info('writing scripts into: %s',
                                           tournament_file)
@@ -414,7 +416,9 @@ class JFRBidding(object):
                 board_html.truncate()
 
     def write_bidding_links(self):
-        """ Iterates over traveller files to include links to bidding tables.
+        """
+        Iterate over traveller files to include links to bidding tables.
+
         Cleans up bidding table files, which are not used.
         """
         used_bidding_tables = []
@@ -438,16 +442,14 @@ class JFRBidding(object):
 
 
 def main():
-    """ Program entry point, invoked when __name__ is __main__
-    """
+    """Program entry point, invoked when __name__ is __main__."""
     import argparse
 
     argument_parser = argparse.ArgumentParser(
         description='Display bidding data from BWS files on JFR Pary pages')
 
     def file_path(filepath):
-        """ Sanitizes and validates file paths from input parameters.
-        """
+        """Sanitize and validate file paths from input parameters."""
         filepath = unicode(filepath, sys.getfilesystemencoding())
         if path.isfile(filepath):
             return filepath
