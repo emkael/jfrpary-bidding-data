@@ -16,6 +16,8 @@ import logging as log
 import os
 import threading
 
+from bidding_data import __version__ as bidding_data_version
+
 
 class BiddingGUI(tk.Frame):
     """GUI frame class."""
@@ -105,6 +107,18 @@ class BiddingGUI(tk.Frame):
             title='Wybierz plik z danymi licytacji',
             filetypes=[('BWS files', '.bws'), ('all files', '.*')]))
 
+    def display_info(self):
+        """Show application "About" box."""
+        self.queue(
+            tkMessageBox.showinfo, 'O co cho?',
+            'Narzędzie dodaje do strony wyników z JFR Pary dane licytacji, ' +
+            'zbierane w pliku BWS "pierniczkami" nowego typu.\n' +
+            'Żeby użyć - wybierz główny plik turnieju (PREFIX.html) ' +
+            'oraz plik BWS.\n\n' +
+            'Wersja: ' + bidding_data_version + '\n' +
+            'Autor: M. Klichowicz')
+
+    # GUI message queue (for background thread interaction)
     __queue = None
 
     def queue(self, callback, *args, **kwargs):
@@ -142,7 +156,7 @@ class BiddingGUI(tk.Frame):
         self.__create_widgets()
         # and align them within a layout
         # second column and fourth row should expand
-        self.__configure_grid_cells([1], [3])
+        self.__configure_grid_cells([1], [4])
         # main frame should fill entire application window
         self.pack(expand=1, fill=tk.BOTH)
         # finally, set logging up
@@ -208,14 +222,19 @@ class BiddingGUI(tk.Frame):
         self.run_btn = tk.Button(
             self, text='No to sru!', height=3,
             command=self.__dispatch_run_button_action)
+        info_btn = tk.Button(
+            self, text='OCB?!', command=self.display_info)
         # application exit button
         quit_btn = tk.Button(
             self, text='Koniec tego dobrego', command=self.quit)
-        # third row, leftmost 2/3 of window width, fills entire cell
+        # third and fourth row, leftmost 2/3 of window width, entire cell
         self.run_btn.grid(
-            row=2, column=0, columnspan=4, sticky=tk.N+tk.S+tk.E+tk.W)
+            row=2, column=0, rowspan=2, columnspan=4,
+            sticky=tk.N+tk.S+tk.E+tk.W)
         # third row, rightmost 1/3 of window width
-        quit_btn.grid(row=2, column=4, columnspan=2)
+        info_btn.grid(row=2, column=4, columnspan=3, sticky=tk.E+tk.W)
+        # fourth row, rightmost 1/3 of window width
+        quit_btn.grid(row=3, column=4, columnspan=3, sticky=tk.E+tk.W)
 
         # vertical scrollbar for log output field
         log_scroll_y = tk.Scrollbar(self, orient=tk.VERTICAL)
@@ -228,12 +247,12 @@ class BiddingGUI(tk.Frame):
             yscrollcommand=log_scroll_y.set)
         log_scroll_x['command'] = self.log_field.xview
         log_scroll_y['command'] = self.log_field.yview
-        # fourth row, entries window width, expands with window
+        # fifth row, entries window width, expands with window
         self.log_field.grid(
-            row=3, column=0, columnspan=6, sticky=tk.N+tk.S+tk.E+tk.W)
+            row=4, column=0, columnspan=6, sticky=tk.N+tk.S+tk.E+tk.W)
         # scrollbars to the right and to the bottom of the field
-        log_scroll_y.grid(row=3, column=6, sticky=tk.N+tk.S)
-        log_scroll_x.grid(row=4, column=0, columnspan=6, sticky=tk.E+tk.W)
+        log_scroll_y.grid(row=4, column=6, sticky=tk.N+tk.S)
+        log_scroll_x.grid(row=5, column=0, columnspan=6, sticky=tk.E+tk.W)
 
     def __configure_logging(self):
         """Set up logging facility, bound to log output field."""
