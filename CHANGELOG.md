@@ -2,6 +2,9 @@
 JFR Pary - dane licytacji: lista zmian
 ======================================
 
+1.0.2 (2015-10-27)
+* wersja z interfejsem graficznym
+
 1.0.1 (2015-09-13)
 * logowanie danych diagnostycznych
 * poprawki kodowania protokołów
