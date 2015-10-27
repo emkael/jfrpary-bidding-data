@@ -32,6 +32,7 @@ class BiddingGUI(tk.Frame):
         Sanitizes input parameters, handles warning/error messages,
         imports main module (from CLI script) and runs it.
         """
+        self.run_btn['state'] = tk.DISABLED
         try:
             # reset error/warning count and log output field
             self.__gui_logger.reset_counts()
@@ -71,6 +72,8 @@ class BiddingGUI(tk.Frame):
             log.getLogger('root').error(ex)
             tkMessageBox.showerror('Błąd!', ex)
             raise
+        finally:
+            self.run_btn['state'] = tk.NORMAL
 
     def tour_select(self):
         """
@@ -134,6 +137,10 @@ class BiddingGUI(tk.Frame):
         # the wm.iconphoto call
         self.master.tk.call('wm', 'iconphoto', self.master._w, img)
 
+    def __dispatch_run_button_action(self):
+        """Dispatch main button action asynchronously."""
+        self.run_btn.after(0, self.run_bidding_data)
+
     def __create_widgets(self):
         """
         Create main application window controls and align them on grid.
@@ -169,13 +176,14 @@ class BiddingGUI(tk.Frame):
         bws_select_btn.grid(row=1, column=5)
 
         # main command button
-        run_btn = tk.Button(
-            self, text='No to sru!', height=3, command=self.run_bidding_data)
+        self.run_btn = tk.Button(
+            self, text='No to sru!', height=3,
+            command=self.__dispatch_run_button_action)
         # application exit button
         quit_btn = tk.Button(
             self, text='Koniec tego dobrego', command=self.quit)
         # third row, leftmost 2/3 of window width, fills entire cell
-        run_btn.grid(
+        self.run_btn.grid(
             row=2, column=0, columnspan=4, sticky=tk.N+tk.S+tk.E+tk.W)
         # third row, rightmost 1/3 of window width
         quit_btn.grid(row=2, column=4, columnspan=2)
