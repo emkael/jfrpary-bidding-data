@@ -13,6 +13,7 @@ import tkMessageBox
 
 import logging as log
 import os
+import threading
 
 
 class BiddingGUI(tk.Frame):
@@ -139,7 +140,8 @@ class BiddingGUI(tk.Frame):
 
     def __dispatch_run_button_action(self):
         """Dispatch main button action asynchronously."""
-        self.run_btn.after(0, self.run_bidding_data)
+        run_thread = threading.Thread(target=self.run_bidding_data)
+        run_thread.start()
 
     def __create_widgets(self):
         """
