@@ -334,6 +334,8 @@ class JFRBidding(object):
             re.escape(self.__tournament_prefix) + r'([0-9]{3})\.html')
         log.getLogger('init').debug('tournament files pattern: %s',
                                     self.__tournament_files_match.pattern)
+        self.__bidding_files = []
+        self.__tournament_files = []
         self.__map_board_numbers()
 
     def write_bidding_tables(self):
