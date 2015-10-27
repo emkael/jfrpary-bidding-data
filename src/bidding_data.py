@@ -98,6 +98,7 @@ def get_last_bidder(bidding):
 
 
 class JFRBidding(object):
+
     """Bidding data converter (from BWS data to JFR HTML pages)."""
 
     # alignment of the bidding table
@@ -438,7 +439,11 @@ class JFRBidding(object):
                             if unused not in used_bidding_tables]:
             log.getLogger('links').warning(
                 'bidding file %s not used, deleting', unused_file)
-            remove(unused_file)
+            if path.exists(unused_file):
+                remove(unused_file)
+            else:
+                log.getLogger('links').warning(
+                    'bidding file %s does not exist', unused_file)
 
 
 def main():
