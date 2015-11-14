@@ -335,6 +335,7 @@ class JFRBidding(object):
                                     self.__tournament_files_match.pattern)
         self.__bidding_files = []
         self.__tournament_files = []
+        self.__board_number_mapping = {}
         self.__map_board_numbers()
 
     def write_bidding_tables(self):
