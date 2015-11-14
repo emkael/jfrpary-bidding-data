@@ -37,51 +37,93 @@ def parse_lineup_data(sitting_data):
     return round_lineups
 
 
-def parse_bidding_data(bidding_data):
+def merge_timestamps(date_stamp, time_stamp):
+    """
+    Merge two timestamps into a single one.
+
+    First timestamp contains date, second - time.
+    """
+    return ''.join([date_stamp.strftime('%Y%m%d'),
+                    time_stamp.replace(year=1900).strftime('%H%M%S')])
+
+
+def get_board_number(entry):
+    """
+    Compile board_number from BWS entry.
+
+    Value: {board}_{round}_{sector}_{table}
+    """
+    return '_'.join([
+        str(s) for s in [entry[4], entry[3], entry[1], entry[2]]])
+
+
+def erase_bid(bidding, bid):
+    """Erase bid from bidding."""
+    bid_counter = bid[5]
+    board_no = get_board_number(bid)
+    if bidding[bid_counter]['direction'] == bid[6]:
+        bidding.pop(bid_counter, None)
+        log.getLogger('bidding').debug(
+            'erased bid %d from board %s, ' +
+            'round %s, table %s-%s',
+            bid_counter, *board_no.split('_'))
+    else:
+        log.getLogger('bidding').debug(
+            'bid does not match, not removing')
+    return bidding
+
+
+def parse_bidding_data(bidding_data, erased_boards=None):
     """
     Convert BWS bidding to dictionary structure.
 
     Keys: {board}_{round}_{sector}_{table}.{sector}_{table}.{round}
     Values: {bidding}[]
-    Applies call erasures.
+    Applies call erasures and entries result erasures.
     """
     bids = {}
+    erased = {}
+    if erased_boards is None:
+        erased_boards = []
+    for entry in erased_boards:
+        board_no = get_board_number(entry)
+        timestamp = merge_timestamps(entry[13], entry[14])
+        if board_no not in erased or erased[board_no] < timestamp:
+            erased[board_no] = timestamp
     for bid in bidding_data:
         log.getLogger('bidding').debug(bid)
         round_no = bid[3]
         table_no = str(bid[1]) + '_' + str(bid[2])
         board_no = str(bid[4]) + '_' + str(round_no) + '_' + table_no
-        bid_counter = bid[5]
-        bid_erased = bid[10]
-        if board_no not in bids:
-            bids[board_no] = {}
-        if table_no not in bids[board_no]:
-            bids[board_no][table_no] = {}
-        if round_no not in bids[board_no][table_no]:
-            bids[board_no][table_no][round_no] = {}
-        if bid_erased == 1:
-            if bid_counter in bids[board_no][table_no][round_no]:
-                if bids[board_no][table_no][round_no][bid_counter][
-                        'direction'] == bid[6]:
-                    bids[board_no][table_no][round_no].pop(
-                        bid_counter, None)
+        if (board_no not in erased or
+                erased[board_no] < merge_timestamps(bid[8], bid[9])):
+            bid_counter = bid[5]
+            bid_erased = bid[10]
+            if board_no not in bids:
+                bids[board_no] = {}
+            if table_no not in bids[board_no]:
+                bids[board_no][table_no] = {}
+            if round_no not in bids[board_no][table_no]:
+                bids[board_no][table_no][round_no] = {}
+            if (bid_erased == 1 and
+                    bid_counter in bids[board_no][table_no][round_no]):
+                bids[board_no][table_no][round_no] = erase_bid(
+                    bids[board_no][table_no][round_no], bid)
+                if len(bids[board_no][table_no][round_no]) == 0:
+                    bids[board_no][table_no].pop(round_no, None)
                     log.getLogger('bidding').debug(
-                        'erased bid %d from board %s, ' +
-                        'round %s, table %s-%s',
-                        bid_counter, *board_no.split('_'))
-                    if len(bids[board_no][table_no][round_no]) == 0:
-                        bids[board_no][table_no].pop(round_no, None)
-                        log.getLogger('bidding').debug(
-                            'bidding on board %s, round %s, ' +
-                            'table %s-%s empty, removing',
-                            *board_no.split('_'))
-                else:
-                    log.getLogger('bidding').debug(
-                        'bid does not match, not removing')
+                        'bidding on board %s, round %s, ' +
+                        'table %s-%s empty, removing',
+                        *board_no.split('_'))
+            else:
+                bids[board_no][table_no][round_no][bid_counter] = {
+                    'direction': bid[6], 'bid': bid[7]}
+                log.getLogger('bidding').debug(
+                    'board %s, round %s, table %s-%s, bid %d: %s by %s',
+                    *(board_no.split('_') + [bid_counter, bid[7], bid[6]]))
         else:
-            bids[board_no][table_no][round_no][bid_counter] = {
-                'direction': bid[6], 'bid': bid[7]}
-            log.getLogger('bidding').debug(
+            log.getLogger('bidding').info(
+                'bid from erased board skipped: ' +
                 'board %s, round %s, table %s-%s, bid %d: %s by %s',
                 *(board_no.split('_') + [bid_counter, bid[7], bid[6]]))
     return bids
@@ -320,12 +362,14 @@ class JFRBidding(object):
             self.__lineup_data = cursor.execute(
                 'SELECT * FROM RoundData').fetchall()
             bid_data = cursor.execute('SELECT * FROM BiddingData').fetchall()
+            erased_boards = cursor.execute(
+                'SELECT * FROM ReceivedData WHERE Erased').fetchall()
         log.getLogger('init').debug('parsing lineup data (%d entries)',
                                     len(self.__lineup_data))
         self.__round_lineups = parse_lineup_data(self.__lineup_data)
         log.getLogger('init').debug('parsing bidding data (%d entries)',
                                     len(bid_data))
-        self.__bids = parse_bidding_data(bid_data)
+        self.__bids = parse_bidding_data(bid_data, erased_boards)
         log.getLogger('init').debug('parsing prefix, filename = %s',
                                     file_prefix)
         self.__tournament_prefix = path.splitext(
