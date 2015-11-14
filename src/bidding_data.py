@@ -14,7 +14,7 @@ import logging as log
 from os import path, remove
 from bs4 import BeautifulSoup as bs4
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 
 def parse_lineup_data(sitting_data):
