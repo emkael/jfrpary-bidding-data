@@ -126,6 +126,8 @@ class JFRBidding(object):
                         'img', src='images/' + call_match.group(2) + '.gif')
                     bid_cell.append(bid_icon)
                 else:
+                    if bid == 'SkipBid':
+                        bid = '( - )'
                     bid_cell.append(bid)
                 bidding_row.append(bid_cell)
             log.getLogger('b_format').debug('%5s' * 4, *bid_round)
