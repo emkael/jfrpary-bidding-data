@@ -204,6 +204,7 @@ class JFRBidding(object):
             if re.search(self.__tournament_files_match, f)]
         log.getLogger('b_map').debug('found %d possible board files to map',
                                      len(self.__tournament_files))
+        self.__board_number_mapping.clear()
         for round_data in self.__lineup_data:
             log.getLogger('b_map').debug('round data: %s', round_data)
             # 13th column has JFR number for the first board
@@ -379,13 +380,11 @@ class JFRBidding(object):
             re.escape(self.__tournament_prefix) + r'([0-9]{3})\.html')
         log.getLogger('init').debug('tournament files pattern: %s',
                                     self.__tournament_files_match.pattern)
-        self.__bidding_files = []
-        self.__tournament_files = []
-        self.__board_number_mapping = {}
         self.__map_board_numbers()
 
     def write_bidding_tables(self):
         """Iterate over bidding and writes tables to HTML files."""
+        self.__bidding_files = []
         for board_no, board_data in self.__bids.items():
             if board_no in self.__board_number_mapping:
                 for table_no, table_data in board_data.items():
@@ -419,7 +418,6 @@ class JFRBidding(object):
                                 log.getLogger('tables').info(
                                     'lineup for table %s, round %s not found',
                                     table_no, round_no)
-                                print self.__round_lineups[round_no]
                         else:
                             log.getLogger('tables').info(
                                 'lineup for round %s not found',
