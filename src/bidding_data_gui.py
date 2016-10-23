@@ -14,6 +14,7 @@ import Queue
 
 import logging as log
 import os
+import socket
 import threading
 
 from bidding_data import __version__ as bidding_data_version
@@ -46,14 +47,24 @@ class BiddingGUI(tk.Frame):
             if not os.path.exists(self.__tour_filename.get()):
                 raise Exception('Tournament results file not found')
 
+            # Goniec parameters/switches
+            goniec_params = '%s:%d' % (self.__goniec_host.get(),
+                                       self.__goniec_port.get()) \
+                                       if self.__goniec_enabled.get() == 1 \
+                                          else None
+
             # do the magic
             from bidding_data import JFRBidding
             parser = JFRBidding(
                 bws_file=self.__bws_filename.get(),
-                file_prefix=self.__tour_filename.get())
-            parser.write_bidding_tables()
-            parser.write_bidding_scripts()
-            parser.write_bidding_links()
+                file_prefix=self.__tour_filename.get(),
+                goniec_setup=goniec_params)
+            changed_files = []
+            changed_files += parser.write_bidding_tables()
+            changed_files += parser.write_bidding_scripts()
+            changed_files += parser.write_bidding_links()
+            if self.__goniec_enabled.get() == 1:
+                parser.send_changed_files(changed_files)
 
             # inform of any warnings/errors that might have occuerd
             if self.__gui_logger.errors():
@@ -118,6 +129,34 @@ class BiddingGUI(tk.Frame):
             'Wersja: ' + bidding_data_version + '\n' +
             'Autor: M. Klichowicz')
 
+    def toggle_goniec(self):
+        """Toggle state for Goniec-related controls on Goniec switch toggle."""
+        for control in [
+                self.goniec_host_label, self.goniec_host_field,
+                self.goniec_port_label, self.goniec_port_field,
+                self.goniec_test_btn]:
+            self.queue(control.__setitem__, 'state', tk.NORMAL
+                       if self.__goniec_enabled.get() == 1 else tk.DISABLED)
+
+    def test_goniec(self):
+        """Test connectivity with Goniec and display a message accordingly."""
+        goniec_socket = socket.socket()
+        try:
+            goniec_socket.connect((self.__goniec_host.get(),
+                                   self.__goniec_port.get()))
+            goniec_socket.close()
+            self.queue(
+                tkMessageBox.showinfo, 'Hurra!',
+                'Goniec - albo coś, co go udaje - działa!')
+        except socket.error as err:
+            self.queue(
+                tkMessageBox.showerror, 'Buuu...',
+                'Pod podanym adresem Goniec nie działa :(')
+        except (ValueError, OverflowError):
+            self.queue(
+                tkMessageBox.showerror, 'Buuu...',
+                'Parametry Gońca mają niewłaściwy format, czemu mi to robisz :(')
+
     # GUI message queue (for background thread interaction)
     __queue = None
 
@@ -137,7 +176,7 @@ class BiddingGUI(tk.Frame):
             self.master.after(100, self.process_queue)
         else:
             callback(*args, **kwargs)
-            self.master.after(10, self.process_queue)
+            self.master.after(1, self.process_queue)
 
     def __init__(self, master=None):
         """
@@ -149,14 +188,19 @@ class BiddingGUI(tk.Frame):
         # bind Tk variables to input parameter paths
         self.__tour_filename = tk.StringVar(master=self)
         self.__bws_filename = tk.StringVar(master=self)
+        # and to Goniec parameters
+        self.__goniec_host = tk.StringVar(master=self)
+        self.__goniec_port = tk.IntVar(master=self)
+        # "boolean" variable to hold chackbox state
+        self.__goniec_enabled = tk.IntVar(master=self)
         # set window title and icon
         self.master.title('JBBD - JFR/BWS bidding data')
         self.__set_icon(self.__icon_data)
         # create controls
         self.__create_widgets()
         # and align them within a layout
-        # second column and fourth row should expand
-        self.__configure_grid_cells([1], [4])
+        # second column and sixth row should expand
+        self.__configure_grid_cells([1], [5])
         # main frame should fill entire application window
         self.pack(expand=1, fill=tk.BOTH)
         # finally, set logging up
@@ -236,6 +280,46 @@ class BiddingGUI(tk.Frame):
         # fourth row, rightmost 1/3 of window width
         quit_btn.grid(row=3, column=4, columnspan=3, sticky=tk.E+tk.W)
 
+        # Goniec toggle checkbox
+        self.goniec_checkbox = tk.Checkbutton(
+            self, text='Ślij Gońcem',
+            command=self.toggle_goniec,
+            variable=self.__goniec_enabled)
+        # fifth row, leftmost column
+        self.goniec_checkbox.grid(
+            row=4, column=0)
+        # label for Goniec host entry field
+        self.goniec_host_label = tk.Label(
+            self, text='Host:')
+        # fifth row, second column, aligned to the right
+        self.goniec_host_label.grid(
+            row=4, column=1, sticky=tk.E)
+        # Goniec host entry field
+        self.goniec_host_field = tk.Entry(
+            self, textvariable=self.__goniec_host)
+        # fifth row, third column, aligned to the left
+        self.goniec_host_field.grid(
+            row=4, column=2, sticky=tk.W)
+        # label for Goniec port entry field
+        self.goniec_port_label = tk.Label(
+            self, text='Port:')
+        # fifth row, fourth column, aligned to the right
+        self.goniec_port_label.grid(
+            row=4, column=3, sticky=tk.E)
+        # Goniec port entry field
+        self.goniec_port_field = tk.Entry(
+            self, textvariable=self.__goniec_port)
+        # fifth row, fifth column, aligned to the left
+        self.goniec_port_field.grid(
+            row=4, column=4, sticky=tk.W)
+        # Goniec test button
+        self.goniec_test_btn = tk.Button(
+            self, text='Test Gońca',
+            command=self.test_goniec)
+        # fifth row, rightmost column
+        self.goniec_test_btn.grid(
+            row=4, column=5)
+
         # vertical scrollbar for log output field
         log_scroll_y = tk.Scrollbar(self, orient=tk.VERTICAL)
         # horizontal scrollbar for log output field
@@ -249,10 +333,10 @@ class BiddingGUI(tk.Frame):
         log_scroll_y['command'] = self.log_field.yview
         # fifth row, entries window width, expands with window
         self.log_field.grid(
-            row=4, column=0, columnspan=6, sticky=tk.N+tk.S+tk.E+tk.W)
+            row=5, column=0, columnspan=6, sticky=tk.N+tk.S+tk.E+tk.W)
         # scrollbars to the right and to the bottom of the field
-        log_scroll_y.grid(row=4, column=6, sticky=tk.N+tk.S)
-        log_scroll_x.grid(row=5, column=0, columnspan=6, sticky=tk.E+tk.W)
+        log_scroll_y.grid(row=5, column=6, sticky=tk.N+tk.S)
+        log_scroll_x.grid(row=6, column=0, columnspan=6, sticky=tk.E+tk.W)
 
     def __configure_logging(self):
         """Set up logging facility, bound to log output field."""
