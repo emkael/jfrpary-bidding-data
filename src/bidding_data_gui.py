@@ -449,7 +449,8 @@ class BiddingGUI(tk.Frame):
         self.__default_config['goniec']['host'] = self.__goniec_host.get()
         self.__default_config['goniec']['port'] = self.__goniec_port.get()
         self.__default_config['goniec']['enabled'] = self.__goniec_enabled.get()
-        json.dump(self.__default_config, file(self.__config_file, 'w'))
+        json.dump(self.__default_config, file(self.__config_file, 'w'),
+                  sort_keys=True, indent=4)
 
     # embedded image data for app icon
     __icon_data = """R0lGODlhIAAgAOeRAAAAAAQEBAUFBQYGBggICAAAcQAAcgAAcwAAdAAAdQA
