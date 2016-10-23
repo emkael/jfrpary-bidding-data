@@ -15,6 +15,7 @@ import Queue
 import logging as log
 import os
 import socket
+import json
 import threading
 
 from bidding_data import __version__ as bidding_data_version
@@ -157,6 +158,14 @@ class BiddingGUI(tk.Frame):
                 tkMessageBox.showerror, 'Buuu...',
                 'Parametry Gońca mają niewłaściwy format, czemu mi to robisz :(')
 
+    def on_close(self):
+        """Handles root window WM_DELETE_WINDOW message."""
+        try:
+            self.__store_config()
+        except:
+            log.getLogger('config').error('Could not save config file')
+        self.master.destroy()
+
     # GUI message queue (for background thread interaction)
     __queue = None
 
@@ -205,6 +214,24 @@ class BiddingGUI(tk.Frame):
         self.pack(expand=1, fill=tk.BOTH)
         # finally, set logging up
         self.__configure_logging()
+        # default config values
+        self.__default_config = {
+            'paths': {
+                'html': '',
+                'bws': ''
+            },
+            'goniec': {
+                'enabled': 0,
+                'host': 'localhost',
+                'port': 8090
+            }
+        }
+        # config file path
+        self.__config_file = 'config.json'
+        # restore config from file
+        self.__restore_config()
+        # register on-close hook
+        self.master.protocol("WM_DELETE_WINDOW", self.on_close)
         # fire up interthread queue
         self.after(100, self.process_queue)
 
@@ -396,6 +423,34 @@ class BiddingGUI(tk.Frame):
         # remove default (console) handler
         log.getLogger().removeHandler(log.getLogger().handlers[0])
 
+    def __restore_config(self):
+        """Read config from JSON file."""
+        try:
+            if os.path.exists(self.__config_file):
+                self.__default_config = json.load(file(self.__config_file))
+            else:
+                log.getLogger('config').info(
+                    'Config does not exist, using defaults')
+            self.__tour_filename.set(self.__default_config['paths']['html'])
+            self.__bws_filename.set(self.__default_config['paths']['bws'])
+            self.__goniec_host.set(self.__default_config['goniec']['host'])
+            self.__goniec_port.set(self.__default_config['goniec']['port'])
+            self.__goniec_enabled.set(self.__default_config['goniec']['enabled'])
+            self.toggle_goniec()
+        except:
+            log.getLogger('config').warning(
+                'Could not load complete config from file')
+            raise
+
+    def __store_config(self):
+        """Write config to JSON file."""
+        self.__default_config['paths']['html'] = self.__tour_filename.get()
+        self.__default_config['paths']['bws'] = self.__bws_filename.get()
+        self.__default_config['goniec']['host'] = self.__goniec_host.get()
+        self.__default_config['goniec']['port'] = self.__goniec_port.get()
+        self.__default_config['goniec']['enabled'] = self.__goniec_enabled.get()
+        json.dump(self.__default_config, file(self.__config_file, 'w'))
+
     # embedded image data for app icon
     __icon_data = """R0lGODlhIAAgAOeRAAAAAAQEBAUFBQYGBggICAAAcQAAcgAAcwAAdAAAdQA
 AdgAAdwAAeAAAeQEBegsLEQQEewUFew4ODgYGfA8PDwgIfQoKfgoKfxMTEwsLfxQUIQ0NgBERghISghQ
@@ -422,7 +477,8 @@ PKMWxAQccTOBAB1BWyYEURCLYmBMmMLVggl4WVEUkjZRp5plopmlmJFUcRQFwcB5GwT8BAQA7"""
 
 def main():
     """Entry point for application - spawn main window."""
-    app = BiddingGUI()
+    root = tk.Tk()
+    app = BiddingGUI(master=root)
     app.mainloop()
 
 if __name__ == '__main__':
