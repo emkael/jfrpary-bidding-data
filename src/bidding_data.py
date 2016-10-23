@@ -8,6 +8,7 @@ by JFR Pary.
 import sys
 import glob
 import re
+import socket
 import pypyodbc
 import logging as log
 
@@ -355,7 +356,7 @@ class JFRBidding(object):
     # all generated bidding table files, for cleanup purposes
     __bidding_files = []
 
-    def __init__(self, bws_file, file_prefix):
+    def __init__(self, bws_file, file_prefix, goniec_setup=None):
         """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
         with pypyodbc.win_connect_mdb(bws_file) as connection:
@@ -381,6 +382,13 @@ class JFRBidding(object):
         log.getLogger('init').debug('tournament files pattern: %s',
                                     self.__tournament_files_match.pattern)
         self.__map_board_numbers()
+        self.__goniec_host = None
+        if goniec_setup is not None:
+            setup_parts = goniec_setup.split(':')
+            self.__goniec_host = setup_parts[0] \
+                                 if len(setup_parts) > 0 else 'localhost'
+            self.__goniec_port = int(setup_parts[1]) \
+                                 if len(setup_parts) > 1 else 8090
 
     def write_bidding_tables(self):
         """Iterate over bidding and writes tables to HTML files."""
@@ -425,6 +433,7 @@ class JFRBidding(object):
             else:
                 log.getLogger('tables').info('mapping for board %s not found',
                                              board_no)
+        return self.__bidding_files
 
     def write_bidding_scripts(self):
         """Alter traveller files to include necessary JavaScript."""
@@ -461,6 +470,7 @@ class JFRBidding(object):
                 board_html.write(board_content.prettify(
                     'utf-8', formatter='html'))
                 board_html.truncate()
+        return self.__tournament_files
 
     def write_bidding_links(self):
         """
@@ -469,6 +479,7 @@ class JFRBidding(object):
         Cleans up bidding table files, which are not used.
         """
         used_bidding_tables = []
+        used_board_files = []
         for tournament_file in self.__tournament_files:
             file_number = re.match(
                 self.__tournament_files_match,
@@ -478,6 +489,7 @@ class JFRBidding(object):
                                         file_number, board_text_path)
             used_bidding_tables = self.__write_bidding_file(
                 board_text_path, file_number) + used_bidding_tables
+            used_board_files.append(board_text_path)
             log.getLogger('links').info('used board files: %s',
                                         ', '.join(used_bidding_tables))
         for unused_file in [unused for unused
@@ -490,6 +502,32 @@ class JFRBidding(object):
             else:
                 log.getLogger('links').warning(
                     'bidding file %s does not exist', unused_file)
+        return used_board_files
+
+    def send_changed_files(self, files_to_send):
+        if self.__goniec_host is not None:
+            working_directory = path.dirname(self.__tournament_prefix) \
+                                + path.sep
+            files_to_send = [file_to_send.replace(working_directory, '', 1)
+                             for file_to_send in files_to_send
+                             if file_to_send.startswith(working_directory)]
+            try:
+                goniec_socket = socket.socket()
+                goniec_socket.connect((self.__goniec_host, self.__goniec_port))
+                log.getLogger('goniec').info(
+                    'connected to Goniec at %s:%d' \
+                    % (self.__goniec_host, self.__goniec_port))
+                goniec_socket.sendall('\n'.join(
+                    [working_directory] + files_to_send + ['bye', '']))
+                log.getLogger('goniec').info(
+                    'working directory is: %s' % working_directory)
+                goniec_socket.close()
+                for file_sent in files_to_send:
+                    log.getLogger('goniec').info(
+                        'sent file to Goniec: %s' % file_sent)
+            except socket.error as er:
+                log.getLogger('goniec').error(
+                    'unable to connect to Goniec: %s' % er)
 
 
 def main():
@@ -534,6 +572,10 @@ def main():
     argument_parser.add_argument('-f', '--log-file', metavar='LOGFILE',
                                  help='log file path',
                                  default='bidding_data.log')
+    argument_parser.add_argument('-s', '--send-files', metavar='GONIEC_PORT',
+                                 help='use Goniec to send modified files',
+                                 nargs='?',
+                                 default=None, const='localhost:8090')
 
     arguments = argument_parser.parse_args()
 
@@ -559,12 +601,15 @@ def main():
         bidding_parser = JFRBidding(
             bws_file=arguments.bws_file,
             file_prefix=arguments.path,
+            goniec_setup=arguments.send_files
         )
-        bidding_parser.write_bidding_tables()
-        bidding_parser.write_bidding_scripts()
-        bidding_parser.write_bidding_links()
+        all_files = []
+        all_files += bidding_parser.write_bidding_tables()
+        all_files += bidding_parser.write_bidding_scripts()
+        all_files += bidding_parser.write_bidding_links()
+        bidding_parser.send_changed_files(all_files)
     except Exception as ex:
-        log.getLogger('root').error(ex.strerror)
+        #log.getLogger('root').error(ex.strerror)
         raise
 
     log.info('--------- program ended ---------')
