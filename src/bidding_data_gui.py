@@ -431,16 +431,16 @@ class BiddingGUI(tk.Frame):
             else:
                 log.getLogger('config').info(
                     'Config does not exist, using defaults')
+        except:
+            log.getLogger('config').warning(
+                'Could not load complete config from file')
+        finally:
             self.__tour_filename.set(self.__default_config['paths']['html'])
             self.__bws_filename.set(self.__default_config['paths']['bws'])
             self.__goniec_host.set(self.__default_config['goniec']['host'])
             self.__goniec_port.set(self.__default_config['goniec']['port'])
             self.__goniec_enabled.set(self.__default_config['goniec']['enabled'])
             self.toggle_goniec()
-        except:
-            log.getLogger('config').warning(
-                'Could not load complete config from file')
-            raise
 
     def __store_config(self):
         """Write config to JSON file."""
