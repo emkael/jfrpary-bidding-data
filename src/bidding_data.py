@@ -517,8 +517,10 @@ class JFRBidding(object):
                 log.getLogger('goniec').info(
                     'connected to Goniec at %s:%d' \
                     % (self.__goniec_host, self.__goniec_port))
+                content_lines = [working_directory] + files_to_send + ['bye', '']
                 goniec_socket.sendall('\n'.join(
-                    [working_directory] + files_to_send + ['bye', '']))
+                    [line.encode(sys.getfilesystemencoding())
+                     for line in content_lines]))
                 log.getLogger('goniec').info(
                     'working directory is: %s' % working_directory)
                 goniec_socket.close()
