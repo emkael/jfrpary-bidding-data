@@ -5,14 +5,15 @@ Utility to insert HTML tables with bidding data into traveller files generated
 by JFR Pary.
 """
 
-import sys
 import glob
+import logging as log
 import re
 import socket
-import pypyodbc
-import logging as log
-
+import sys
 from os import path, remove
+
+import pypyodbc
+
 from bs4 import BeautifulSoup as bs4
 
 __version__ = '1.0.3'
@@ -356,6 +357,9 @@ class JFRBidding(object):
     # all generated bidding table files, for cleanup purposes
     __bidding_files = []
 
+    # configuration for Goniec
+    __goniec = {'host': None, 'port': None}
+
     def __init__(self, bws_file, file_prefix, goniec_setup=None):
         """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
@@ -382,13 +386,12 @@ class JFRBidding(object):
         log.getLogger('init').debug('tournament files pattern: %s',
                                     self.__tournament_files_match.pattern)
         self.__map_board_numbers()
-        self.__goniec_host = None
         if goniec_setup is not None:
             setup_parts = goniec_setup.split(':')
-            self.__goniec_host = setup_parts[0] \
-                                 if len(setup_parts) > 0 else 'localhost'
-            self.__goniec_port = int(setup_parts[1]) \
-                                 if len(setup_parts) > 1 else 8090
+            self.__goniec['host'] = setup_parts[0] if len(setup_parts) > 0 \
+                else 'localhost'
+            self.__goniec['port'] = int(setup_parts[1]) \
+                if len(setup_parts) > 1 else 8090
 
     def write_bidding_tables(self):
         """Iterate over bidding and writes tables to HTML files."""
@@ -505,7 +508,8 @@ class JFRBidding(object):
         return used_board_files
 
     def send_changed_files(self, files_to_send):
-        if self.__goniec_host is not None:
+        """Send specified files from working directory via Goniec."""
+        if self.__goniec['host'] is not None:
             working_directory = path.dirname(self.__tournament_prefix) \
                                 + path.sep
             files_to_send = [file_to_send.replace(working_directory, '', 1)
@@ -513,23 +517,26 @@ class JFRBidding(object):
                              if file_to_send.startswith(working_directory)]
             try:
                 goniec_socket = socket.socket()
-                goniec_socket.connect((self.__goniec_host, self.__goniec_port))
+                goniec_socket.connect((
+                    self.__goniec['host'],
+                    self.__goniec['port']))
                 log.getLogger('goniec').info(
-                    'connected to Goniec at %s:%d' \
-                    % (self.__goniec_host, self.__goniec_port))
-                content_lines = [working_directory] + files_to_send + ['bye', '']
+                    'connected to Goniec at %s:%d',
+                    self.__goniec['host'], self.__goniec['port'])
+                content_lines = [working_directory] + \
+                    files_to_send + ['bye', '']
                 goniec_socket.sendall('\n'.join(
                     [line.encode(sys.getfilesystemencoding())
                      for line in content_lines]))
                 log.getLogger('goniec').info(
-                    'working directory is: %s' % working_directory)
+                    'working directory is: %s', working_directory)
                 goniec_socket.close()
                 for file_sent in files_to_send:
                     log.getLogger('goniec').info(
-                        'sent file to Goniec: %s' % file_sent)
-            except socket.error as er:
+                        'sent file to Goniec: %s', file_sent)
+            except socket.error as err:
                 log.getLogger('goniec').error(
-                    'unable to connect to Goniec: %s' % er)
+                    'unable to connect to Goniec: %s', err)
 
 
 def main():
@@ -611,7 +618,7 @@ def main():
         all_files += bidding_parser.write_bidding_links()
         bidding_parser.send_changed_files(all_files)
     except Exception as ex:
-        #log.getLogger('root').error(ex.strerror)
+        log.getLogger('root').error(ex)
         raise
 
     log.info('--------- program ended ---------')
