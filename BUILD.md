@@ -102,7 +102,7 @@ Kompilacja do EXE:
 
 Zbudowanie paczki z [`bundle`](bundle):
 
-* Windows PowerShell
+* Windows PowerShell (4.0)
 * .NET 4.5
 
 Interfejs graficzny (dodatkowo):
@@ -120,6 +120,11 @@ PowerShella.
 z niektórych ścieżek nie-ASCII:
 https://github.com/pyinstaller/pyinstaller/issues/1396
 (.exe dostarczane w `dist` powinno działać)
+* od czasu pierwszej wersji aplikacji, PyInstaller ruszył bardzo mocno
+do przodu, gdybym miał określić, w której wersji projekt buduje się
+bez problemu, musiałbym ponownie użyć: `¯\_(ツ)_/¯` - czasem działa 2.2.1
+z ręcznym patchem na problemy wymienione powyżej, czasem 3.3, ostatnio działała
+3.3.dev0+b78bfe5
 
 Kod żródłowy
 ------------
