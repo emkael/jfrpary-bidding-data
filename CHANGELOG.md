@@ -2,6 +2,10 @@
 JFR Pary - dane licytacji: lista zmian
 ======================================
 
+1.1rc1 (2016-10-24)
+* obsługa Gońca
+* zapamiętywanie wypełnionych wartości (ścieżek + konf. Gońca)
+
 1.0.3 (2015-11-14)
 * obsługa usuwania licytacji sprzed usunięcia całego rozdania
 * poprawki inicjalizacji listy przetwarzanych plików

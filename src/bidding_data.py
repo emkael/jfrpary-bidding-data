@@ -16,7 +16,7 @@ import pypyodbc
 
 from bs4 import BeautifulSoup as bs4
 
-__version__ = '1.0.3'
+__version__ = '1.1rc1'
 
 
 def parse_lineup_data(sitting_data):
