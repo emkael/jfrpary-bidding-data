@@ -19,7 +19,7 @@ import tkMessageBox
 import Tkinter as tk
 
 from bidding_data import __version__ as bidding_data_version
-
+import bidding_data_resources as res
 
 # config file path
 CONFIG_FILE = 'config.json'
@@ -213,7 +213,7 @@ class BiddingGUI(tk.Frame):
 
         # set window title and icon
         self.master.title('JBBD - JFR/BWS bidding data')
-        self.__set_icon(self.__icon_data)
+        self.__set_icon(res.ICON)
 
         # create controls
         self.__create_widgets()
@@ -486,29 +486,6 @@ class BiddingGUI(tk.Frame):
         }
         json.dump(self.__default_config, file(CONFIG_FILE, 'w'),
                   sort_keys=True, indent=4)
-
-    # embedded image data for app icon
-    __icon_data = """R0lGODlhIAAgAOeRAAAAAAQEBAUFBQYGBggICAAAcQAAcgAAcwAAdAAAdQA
-AdgAAdwAAeAAAeQEBegsLEQQEewUFew4ODgYGfA8PDwgIfQoKfgoKfxMTEwsLfxQUIQ0NgBERghISghQ
-UgxQUhBUVhRYWhhkZhhkZhxoajxsbhx4eiSgoKCIijCQkjC0tRzAwMCoqkSsrkSwskCwskjExkzU1lzg
-4ljg4mUFBQTs7mjw8mUJChEhISEVFn0hIolBQVUpKo01NoVBQgU9Pok9PplVVqlhYp1pakllZp1lZq1t
-bklpaqF1dlFxcqV5eq19fqmBgsGFhsGJirGJisWNjsWVlrWVlrmZmrmhotG5ubmlpvG1tsHFxuXR0tXR
-0u3V1u3V1vHV1vXZ2vHd3vXh4vXt7xnt7x3x8x3x8yH19wH5+u4GBvIKCyoaGv4eHwJSUxpWVx5ubzp6
-e0p+fzKWl26io0aur0q+v1Lq62ry83L+/3cDA3sHB3sbG4MbG4cnJycjI4svL49TU6NfX6tjY69nZ69v
-b7ODg7ubm8urq9O3t9e7u9u/v9vPz+Pf3+/n5/Pr6/Pz8/Pz8/f39/v7+/v/////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//////////////////////yH5BAEKAP8ALAAAAAAgACAAQAj+AP9JAECwYMEAGP4pXMiwIUOCaMo0qeE
-FCpMcQZAAOOGwY0OCkUJGcsQmCyGRKEMSWYCgT8qQBlH6gVBhykuRSTzchFlQDJgXMbQILaLFCEGPSP+
-B3MmU6Z6YfBJAmBOFQYOrCXokQplTZKAINiDxXNq0bEqDKrqQWcv2ioajSTsStPLhyYwvLKxaMAogrlw
-AYoQKFhzmgcHDiAsqBWC2sciYd+pESnG1wYFBN7uuQZDmbMFIetREklGZwRKRbwogOLDAMoLXCFoLiRT
-TcWOCBBLr3o2YwEDeff06JMhFy5cvgrdo8QFX+EKCY3SAmGGcRQYsQ5o7X0xiRIgLVBS1MLiQ4Ebw7Qo
-JBobCQ8uTFiiAaASwAv1iOG3y69fvZgeO/wAGGCANAgAwAFm2NVWbbYQAUshOMdmBSCRCXGUAHjslIYI
-ZBsjxElQuRHJGa1cp8MdLXUVCxwJKoAQVAnkcQmIDDMgQ0iOMMALJETrluIghG5SgCG2f1SFIJDBcxcA
-PKMWxAQccTOBAB1BWyYEURCLYmBMmMLVggl4WVEUkjZRp5plopmlmJFUcRQFwcB5GwT8BAQA7"""
 
 
 def main():
