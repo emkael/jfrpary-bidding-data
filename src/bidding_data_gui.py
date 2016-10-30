@@ -395,7 +395,7 @@ class BiddingGUI(tk.Frame):
             """Log handler which allows output to Tk Text widget."""
 
             def __init__(self, text):
-                """Construct the handler, provided TExt widget to bind to."""
+                """Construct the handler, provided Text widget to bind to."""
                 log.Handler.__init__(self)
                 self.text = text
 
