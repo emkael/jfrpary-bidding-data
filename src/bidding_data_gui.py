@@ -73,22 +73,26 @@ class BiddingGUI(tk.Frame):
 
             # inform of any warnings/errors that might have occuerd
             if self.__gui_logger.errors():
-                self.queue(tkMessageBox.showerror,
-                           'Błąd!',
+                self.queue(res.play, 'error')
+                self.queue(self.log_field.insert, tk.END,
                            ('Podczas wykonywania programu wystąpiły błędy ' +
                             'w liczbie: %d\n' +
-                            'Sprawdź dziennik logów')
+                            'Sprawdź dziennik logów\n')
                            % self.__gui_logger.errors())
+                self.queue(self.log_field.yview, tk.END)
             elif self.__gui_logger.warnings():
-                self.queue(tkMessageBox.showwarning,
-                           'Uwaga!',
+                self.queue(res.play, 'warning')
+                self.queue(self.log_field.insert, tk.END,
                            ('Podczas wykonywania programu wystąpiły ' +
                             'ostrzeżenia w liczbie: %d\n' +
-                            'Sprawdź dziennik logów')
+                            'Sprawdź dziennik logów\n')
                            % self.__gui_logger.warnings())
+                self.queue(self.log_field.yview, tk.END)
             else:
-                self.queue(
-                    tkMessageBox.showinfo, 'Cudownie!', 'Wszystko wporzo.')
+                self.queue(res.play, 'success')
+                self.queue(self.log_field.insert, tk.END,
+                           'Wszystko wporzo.\n')
+                self.queue(self.log_field.yview, tk.END)
         except Exception as ex:
             # JFRBidding errors are logged
             # (and notified of after entire execution),
