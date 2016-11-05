@@ -70,6 +70,26 @@ Narzędzie obsługuje niestandardowe zakresy numeracji rozdań w turnieju.
 Mapowanie numeru rozdań z Par na numer rozdania w BWS (numer fizycznego
 pudełka) odbywa się automatycznie (na podstawie danych z BWS).
 
+Opcjonalne argumenty linii poleceń
+----------------------------------
+
+```
+bidding_data.py [-h] [-V] [-q | -v] [-l POZIOM_LOGÓW] [-f PLIK_LOGÓW]
+                [-s [ADRES_GOŃCA]]
+                DANE_SESJI.bws PLIK_TURNIEJU.html
+```
+
+Opis argumentów:
+ * `-h`, `--help`: wyświetla opis argumentów
+ * `-V`, `--version`: wyświetla numer wersji programu
+ * `-q`, `--quiet`: ucisza ostrzeżenia na standardowym wyjściu błędu
+ * `-v`, `--verbose`: wypisuje szczegółowe komunikaty na wyjściu błędu
+ * `-l LOGÓW`, `--log-level POZIOM`: ustawia szczegółowość logowania
+(`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`)
+ * `-f PLIK`, `--log-file PLIK`: ścieżka pliku logów
+ * `-s [GONIEC]`, `--send-files [GONIEC]`: włącza transmisję Gońcem
+(domyślny adres: `localhost:8090`)
+
 Użycie (wersja z interfejsem okienkowym)
 ----------------------------------------
 
@@ -85,7 +105,8 @@ Wersja operująca na wyeksportowanych plikach CSV (np. przez `mdb-export`),
 kompatybilna z pozostałymi systemami operacyjnymi i niewymagająca ODBC,
 dostępna jest w gałęzi [csv](//github.com/emkael/jfrpary-bidding-data/tree/csv).
 
-Do wersji z gałęzi CSV nie ma interfejsu graficznego.
+Do wersji z gałęzi CSV nie ma interfejsu graficznego. Wersja z gałęzi CSV
+została porzucona w wersji ok. 1.0, z czystego lenistwa.
 
 Lista przyszłych usprawnień
 ---------------------------

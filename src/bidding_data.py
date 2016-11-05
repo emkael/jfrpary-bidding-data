@@ -581,7 +581,7 @@ def main():
     argument_parser.add_argument('-f', '--log-file', metavar='LOGFILE',
                                  help='log file path',
                                  default='bidding_data.log')
-    argument_parser.add_argument('-s', '--send-files', metavar='GONIEC_PORT',
+    argument_parser.add_argument('-s', '--send-files', metavar='GONIEC_HOST',
                                  help='use Goniec to send modified files',
                                  nargs='?',
                                  default=None, const='localhost:8090')
