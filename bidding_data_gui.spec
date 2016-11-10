@@ -1,7 +1,7 @@
 import os
 a = Analysis(['src\\bidding_data_gui.py'],
              pathex=[os.path.abspath('.')],
-             hiddenimports=[],
+             hiddenimports=['bidding_data'],
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)
