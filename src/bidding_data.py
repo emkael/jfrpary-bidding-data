@@ -515,7 +515,8 @@ class JFRBidding(object):
                                 + path.sep
             files_to_send = [file_to_send.replace(working_directory, '', 1)
                              for file_to_send in files_to_send
-                             if file_to_send.startswith(working_directory)]
+                             if file_to_send.startswith(working_directory)
+                             and path.exists(file_to_send)]
             try:
                 goniec_socket = socket.socket()
                 goniec_socket.connect((
