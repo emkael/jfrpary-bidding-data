@@ -488,13 +488,14 @@ class JFRBidding(object):
                 self.__tournament_files_match,
                 tournament_file).group(1)
             board_text_path = path.splitext(tournament_file)[0] + '.txt'
-            log.getLogger('links').info('writing traveller for board %s: %s',
-                                        file_number, board_text_path)
-            used_bidding_tables = self.__write_bidding_file(
-                board_text_path, file_number) + used_bidding_tables
-            used_board_files.append(board_text_path)
-            log.getLogger('links').info('used board files: %s',
-                                        ', '.join(used_bidding_tables))
+            if path.exists(board_text_path):
+                log.getLogger('links').info('writing traveller for board %s: %s',
+                                            file_number, board_text_path)
+                used_bidding_tables = self.__write_bidding_file(
+                    board_text_path, file_number) + used_bidding_tables
+                used_board_files.append(board_text_path)
+                log.getLogger('links').info('used board files: %s',
+                                            ', '.join(used_bidding_tables))
         for unused_file in [unused for unused
                             in self.__bidding_files
                             if unused not in used_bidding_tables]:
