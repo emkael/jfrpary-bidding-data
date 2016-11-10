@@ -14,4 +14,4 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False , version='src\\version', icon='src\\icon.ico')
+          console=False, version='src\\version', icon='src\\icon.ico')
