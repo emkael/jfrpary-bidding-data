@@ -283,8 +283,7 @@ class BiddingGUI(tk.Frame):
             self, text='Plik turnieju:')
         # text field for tournament file path
         tour_entry = tk.Entry(
-            self, state=tk.DISABLED,
-            textvariable=self.__variables['tour_filename'])
+            self, textvariable=self.__variables['tour_filename'])
         # tournament selection button
         tour_select_btn = tk.Button(
             self, text='Szukaj', command=self.tour_select)
@@ -298,8 +297,7 @@ class BiddingGUI(tk.Frame):
             self, text='BWS:')
         # text field for BWS file path
         bws_entry = tk.Entry(
-            self, state=tk.DISABLED,
-            textvariable=self.__variables['bws_filename'])
+            self, textvariable=self.__variables['bws_filename'])
         # BWS selection button
         bws_select_btn = tk.Button(
             self, text='Szukaj', command=self.bws_select)
