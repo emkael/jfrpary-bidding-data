@@ -175,6 +175,10 @@ class BiddingGUI(tk.Frame):
             log.getLogger('config').error('Could not save config file: %s', ex)
         self.master.destroy()
 
+    def on_quit(self):
+        self.on_close()
+        self.quit()
+
     # GUI message queue (for background thread interaction)
     __queue = None
 
@@ -314,7 +318,7 @@ class BiddingGUI(tk.Frame):
             self, text='OCB?!', command=self.display_info)
         # application exit button
         quit_btn = tk.Button(
-            self, text='Koniec tego dobrego', command=self.quit)
+            self, text='Koniec tego dobrego', command=self.on_quit)
         # third and fourth row, leftmost 2/3 of window width, entire cell
         self.run_btn.grid(
             row=2, column=0, rowspan=2, columnspan=4,
