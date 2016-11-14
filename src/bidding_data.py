@@ -482,7 +482,7 @@ class JFRBidding(object):
                     bidding_style = board_content.new_tag(
                         'link', rel='stylesheet',
                         href='css/bidding.css')
-                    jquery_scripts[0].insert_after(bidding_style)
+                    board_content.head.append(bidding_style)
                 board_html.seek(0)
                 board_html.write(board_content.prettify(
                     'utf-8', formatter='html'))
