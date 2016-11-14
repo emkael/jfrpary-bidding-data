@@ -7,6 +7,7 @@ by JFR Pary.
 
 import glob
 import logging as log
+import hashlib
 import re
 import socket
 import sys
@@ -17,6 +18,19 @@ import pypyodbc
 from bs4 import BeautifulSoup as bs4
 
 __version__ = '1.1rc1'
+
+
+def hash_file(file_path, block=65536):
+    """Return MD5 hash of a specified file."""
+    if path.exists(file_path):
+        with file(file_path) as file_obj:
+            file_hash = hashlib.md5()
+            buffer = file_obj.read(block)
+            while len(buffer) > 0:
+                file_hash.update(buffer)
+                buffer = file_obj.read(block)
+            return file_hash.hexdigest()
+    return None
 
 
 def parse_lineup_data(sitting_data):
@@ -146,6 +160,14 @@ class JFRBidding(object):
 
     # alignment of the bidding table
     __directions = ['W', 'N', 'E', 'S']
+
+    def __store_file_hash(self, path):
+        if self.__goniec['host'] is not None:
+            self.__goniec['file_hashes'][path] = hash_file(path)
+
+    def __detect_changed_files(self):
+        return [path for path, file_hash in self.__goniec['file_hashes'].iteritems()
+                if file_hash != hash_file(path)]
 
     def __format_bidding(self, bidding):
         """Convert bidding data to properly formatted HTML table."""
@@ -279,6 +301,7 @@ class JFRBidding(object):
 
     def __write_bidding_file(self, board_text_path, file_number):
         """Alter traveller file to include links to bidding tables."""
+        self.__store_file_hash(board_text_path)
         with file(board_text_path, 'r+') as board_text:
             board_text_content = bs4(
                 board_text, 'lxml')
@@ -358,9 +381,11 @@ class JFRBidding(object):
     __bidding_files = []
 
     # configuration for Goniec
-    __goniec = {'host': None, 'port': None}
+    __goniec = {'host': None, 'port': None,
+                'file_hashes': {}, 'force_resend': False}
 
-    def __init__(self, bws_file, file_prefix, goniec_setup=None):
+    def __init__(self, bws_file, file_prefix,
+                 goniec_setup=None, goniec_force=False):
         """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
         with pypyodbc.win_connect_mdb(bws_file) as connection:
@@ -392,6 +417,7 @@ class JFRBidding(object):
                 else 'localhost'
             self.__goniec['port'] = int(setup_parts[1]) \
                 if len(setup_parts) > 1 else 8090
+            self.__goniec['force_resend'] = goniec_force
 
     def write_bidding_tables(self):
         """Iterate over bidding and writes tables to HTML files."""
@@ -419,6 +445,7 @@ class JFRBidding(object):
                                         self.__board_number_mapping[board_no],
                                         round_no, table_no)
                                 self.__bidding_files.append(bidding_fpath)
+                                self.__store_file_hash(bidding_fpath)
                                 with file(bidding_fpath, 'w') as bidding_file:
                                     bidding_file.write(
                                         self.__format_bidding(bidding_table))
@@ -443,6 +470,7 @@ class JFRBidding(object):
         for tournament_file in self.__tournament_files:
             log.getLogger('scripts').info('writing scripts into: %s',
                                           tournament_file)
+            self.__store_file_hash(tournament_file)
             with file(tournament_file, 'r+') as board_html:
                 board_content = bs4(board_html, 'lxml', from_encoding='utf-8')
                 header_scripts = board_content.select('head script')
@@ -528,10 +556,13 @@ class JFRBidding(object):
         if self.__goniec['host'] is not None:
             working_directory = path.dirname(self.__tournament_prefix) \
                                 + path.sep
+            changed_files = self.__detect_changed_files()
             files_to_send = [file_to_send.replace(working_directory, '', 1)
                              for file_to_send in files_to_send
                              if file_to_send.startswith(working_directory) and
-                             path.exists(file_to_send)]
+                             path.exists(file_to_send) and
+                             (file_to_send in changed_files or
+                              self.__goniec['force_resend'])]
             try:
                 goniec_socket = socket.socket()
                 goniec_socket.connect((
@@ -602,6 +633,8 @@ def main():
                                  help='use Goniec to send modified files',
                                  nargs='?',
                                  default=None, const='localhost:8090')
+    argument_parser.add_argument('-fs', '--force-resend', action='store_true',
+                                 help='force resending all files with Goniec')
 
     arguments = argument_parser.parse_args()
 
@@ -627,7 +660,8 @@ def main():
         bidding_parser = JFRBidding(
             bws_file=arguments.bws_file,
             file_prefix=arguments.path,
-            goniec_setup=arguments.send_files
+            goniec_setup=arguments.send_files,
+            goniec_force=arguments.force_resend
         )
         all_files = []
         all_files += bidding_parser.write_bidding_tables()
