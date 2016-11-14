@@ -29,9 +29,8 @@ interfejsem graficznym.
 
 W katalogu WWW Par skonfiguruj zasoby niezbędnę do prezentacji danych
 licytacji:
-* skopiuj [`css/bidding.css`](res/css/bidding.css) do katalogu WWW
-* dołącz plik [`css/bidding.css`](res/css/bidding.css) gdzieś w arkuszach
-stylów turnieju (np. poprzez `@import` w `kolorki.css`)
+* skopiuj [`css/bidding.css`](res/css/bidding.css) do katalogu WWW (plik
+dołączany jest automatycznie do stron z wynikami)
 * skopiuj [`javas/bidding.js`](res/javas/bidding.js) do podkatalogu javas
 katalogu WWW (plik dołączany jest automatycznie do stron z wynikami)
 * skopiuj [`images/link.png`](res/images/link.png) do podkatalogu images
