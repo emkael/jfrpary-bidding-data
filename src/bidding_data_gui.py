@@ -176,6 +176,7 @@ class BiddingGUI(tk.Frame):
         self.master.destroy()
 
     def on_quit(self):
+        """Handle manual "quit" button click."""
         self.on_close()
         self.quit()
 
