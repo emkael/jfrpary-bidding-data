@@ -166,8 +166,13 @@ class JFRBidding(object):
             self.__goniec['file_hashes'][path] = hash_file(path)
 
     def __detect_changed_files(self):
-        return [path for path, file_hash in self.__goniec['file_hashes'].iteritems()
-                if file_hash != hash_file(path)]
+        changed_paths = []
+        for path, file_hash in self.__goniec['file_hashes'].iteritems():
+            if file_hash != hash_file(path):
+                changed_paths.append(path)
+            else:
+                log.getLogger('hash').info('file not changed: %s', path)
+        return changed_paths
 
     def __format_bidding(self, bidding):
         """Convert bidding data to properly formatted HTML table."""
