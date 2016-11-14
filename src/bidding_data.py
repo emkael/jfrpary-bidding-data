@@ -469,6 +469,20 @@ class JFRBidding(object):
                     'script', src='javas/bidding.js',
                     type='text/javascript')
                 jquery_scripts[0].insert_after(bidding_script)
+                # check for bidding.css
+                bidding_styles = [css for css in
+                                  board_content.find_all(
+                                      'link',
+                                      rel='stylesheet',
+                                      href='css/bidding.css')]
+                log.getLogger('scripts').debug('found %d bidding.css sheets',
+                                               len(bidding_styles))
+                # add if none exist
+                if len(bidding_styles) == 0:
+                    bidding_style = board_content.new_tag(
+                        'link', rel='stylesheet',
+                        href='css/bidding.css')
+                    jquery_scripts[0].insert_after(bidding_style)
                 board_html.seek(0)
                 board_html.write(board_content.prettify(
                     'utf-8', formatter='html'))
