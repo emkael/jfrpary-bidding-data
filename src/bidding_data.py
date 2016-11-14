@@ -489,8 +489,9 @@ class JFRBidding(object):
                 tournament_file).group(1)
             board_text_path = path.splitext(tournament_file)[0] + '.txt'
             if path.exists(board_text_path):
-                log.getLogger('links').info('writing traveller for board %s: %s',
-                                            file_number, board_text_path)
+                log.getLogger('links').info(
+                    'writing traveller for board %s: %s',
+                    file_number, board_text_path)
                 used_bidding_tables = self.__write_bidding_file(
                     board_text_path, file_number) + used_bidding_tables
                 used_board_files.append(board_text_path)
@@ -515,8 +516,8 @@ class JFRBidding(object):
                                 + path.sep
             files_to_send = [file_to_send.replace(working_directory, '', 1)
                              for file_to_send in files_to_send
-                             if file_to_send.startswith(working_directory)
-                             and path.exists(file_to_send)]
+                             if file_to_send.startswith(working_directory) and
+                             path.exists(file_to_send)]
             try:
                 goniec_socket = socket.socket()
                 goniec_socket.connect((
