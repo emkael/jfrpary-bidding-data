@@ -568,28 +568,31 @@ class JFRBidding(object):
                              path.exists(file_to_send) and
                              (file_to_send in changed_files or
                               self.__goniec['force_resend'])]
-            try:
-                goniec_socket = socket.socket()
-                goniec_socket.connect((
-                    self.__goniec['host'],
-                    self.__goniec['port']))
-                log.getLogger('goniec').info(
-                    'connected to Goniec at %s:%d',
-                    self.__goniec['host'], self.__goniec['port'])
-                content_lines = [working_directory] + \
-                    files_to_send + ['bye', '']
-                goniec_socket.sendall('\n'.join(
-                    [line.encode(sys.getfilesystemencoding())
-                     for line in content_lines]))
-                log.getLogger('goniec').info(
-                    'working directory is: %s', working_directory)
-                goniec_socket.close()
-                for file_sent in files_to_send:
+            if len(files_to_send) > 0:
+                try:
+                    goniec_socket = socket.socket()
+                    goniec_socket.connect((
+                        self.__goniec['host'],
+                        self.__goniec['port']))
                     log.getLogger('goniec').info(
-                        'sent file to Goniec: %s', file_sent)
-            except socket.error as err:
-                log.getLogger('goniec').error(
-                    'unable to connect to Goniec: %s', err)
+                        'connected to Goniec at %s:%d',
+                        self.__goniec['host'], self.__goniec['port'])
+                    content_lines = [working_directory] + \
+                                    files_to_send + ['bye', '']
+                    goniec_socket.sendall('\n'.join(
+                        [line.encode(sys.getfilesystemencoding())
+                         for line in content_lines]))
+                    log.getLogger('goniec').info(
+                        'working directory is: %s', working_directory)
+                    goniec_socket.close()
+                    for file_sent in files_to_send:
+                        log.getLogger('goniec').info(
+                            'sent file to Goniec: %s', file_sent)
+                except socket.error as err:
+                    log.getLogger('goniec').error(
+                        'unable to connect to Goniec: %s', err)
+            else:
+                log.getLogger('goniec').info('nothing to send')
 
 
 def main():
