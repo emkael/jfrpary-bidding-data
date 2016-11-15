@@ -17,7 +17,7 @@ import pypyodbc
 
 from bs4 import BeautifulSoup as bs4
 
-__version__ = '1.1rc1'
+__version__ = '1.1rc2'
 
 
 def hash_file(file_path, block=65536):
