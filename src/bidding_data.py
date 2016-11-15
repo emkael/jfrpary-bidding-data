@@ -25,10 +25,10 @@ def hash_file(file_path, block=65536):
     if path.exists(file_path):
         with file(file_path) as file_obj:
             file_hash = hashlib.md5()
-            buffer = file_obj.read(block)
-            while len(buffer) > 0:
-                file_hash.update(buffer)
-                buffer = file_obj.read(block)
+            file_buffer = file_obj.read(block)
+            while len(file_buffer) > 0:
+                file_hash.update(file_buffer)
+                file_buffer = file_obj.read(block)
             return file_hash.hexdigest()
     return None
 
@@ -161,17 +161,17 @@ class JFRBidding(object):
     # alignment of the bidding table
     __directions = ['W', 'N', 'E', 'S']
 
-    def __store_file_hash(self, path):
+    def __store_file_hash(self, file_path):
         if self.__goniec['host'] is not None:
-            self.__goniec['file_hashes'][path] = hash_file(path)
+            self.__goniec['file_hashes'][file_path] = hash_file(file_path)
 
     def __detect_changed_files(self):
         changed_paths = []
-        for path, file_hash in self.__goniec['file_hashes'].iteritems():
-            if file_hash != hash_file(path):
-                changed_paths.append(path)
+        for file_path, file_hash in self.__goniec['file_hashes'].iteritems():
+            if file_hash != hash_file(file_path):
+                changed_paths.append(file_path)
             else:
-                log.getLogger('hash').info('file not changed: %s', path)
+                log.getLogger('hash').info('file not changed: %s', file_path)
         return changed_paths
 
     def __format_bidding(self, bidding):
