@@ -216,7 +216,7 @@ class BiddingGUI(tk.Frame):
             # and to Goniec parameters
             'goniec_host': tk.StringVar(master=self),
             'goniec_port': tk.IntVar(master=self),
-            # "boolean" variable to hold chackbox state
+            # "boolean" variable to hold checkbox state
             'goniec_enabled': tk.IntVar(master=self)
         }
 
