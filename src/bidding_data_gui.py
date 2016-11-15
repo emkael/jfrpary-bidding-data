@@ -63,7 +63,8 @@ class BiddingGUI(tk.Frame):
             parser = JFRBidding(
                 bws_file=self.__variables['bws_filename'].get(),
                 file_prefix=self.__variables['tour_filename'].get(),
-                goniec_setup=goniec_params)
+                goniec_setup=goniec_params,
+                goniec_force=self.__variables['goniec_forced'].get())
             changed_files = []
             changed_files += parser.write_bidding_tables()
             changed_files += parser.write_bidding_scripts()
@@ -216,8 +217,9 @@ class BiddingGUI(tk.Frame):
             # and to Goniec parameters
             'goniec_host': tk.StringVar(master=self),
             'goniec_port': tk.IntVar(master=self),
-            # "boolean" variable to hold checkbox state
-            'goniec_enabled': tk.IntVar(master=self)
+            # "boolean" variables to hold checkbox states
+            'goniec_enabled': tk.IntVar(master=self),
+            'goniec_forced': tk.IntVar(master=self)
         }
 
         # set window title and icon
@@ -358,30 +360,41 @@ class BiddingGUI(tk.Frame):
         # fifth row, leftmost column
         goniec_checkbox.grid(
             row=4, column=0)
+        # aggregate for Goniec controls
+        frame = tk.Frame(self)
+        # fifth row, second leftmost column, 1-4-1 layout
+        frame.grid(row=4, column=1, columnspan=4, sticky=tk.E+tk.W)
+        # Goniec force toggle checkbox
+        goniec_force_checkbox = tk.Checkbutton(
+            frame, text='Wymuś przesłanie',
+            variable=self.__variables['goniec_forced'])
+        # first column of frame, aligned to the left
+        goniec_force_checkbox.grid(
+            row=0, column=0, sticky=tk.W)
         # label for Goniec host entry field
         goniec_host_label = tk.Label(
-            self, text='Host:')
-        # fifth row, second column, aligned to the right
+            frame, text='Host:')
+        # second column of frame, aligned to the right
         goniec_host_label.grid(
-            row=4, column=1, sticky=tk.E)
+            row=0, column=1, sticky=tk.E)
         # Goniec host entry field
         goniec_host_field = tk.Entry(
-            self, textvariable=self.__variables['goniec_host'])
+            frame, textvariable=self.__variables['goniec_host'])
         # fifth row, third column, aligned to the left
         goniec_host_field.grid(
-            row=4, column=2, sticky=tk.W)
+            row=0, column=2, sticky=tk.W+tk.E)
         # label for Goniec port entry field
         goniec_port_label = tk.Label(
-            self, text='Port:')
+            frame, text='Port:')
         # fifth row, fourth column, aligned to the right
         goniec_port_label.grid(
-            row=4, column=3, sticky=tk.E)
+            row=0, column=3, sticky=tk.E)
         # Goniec port entry field
         goniec_port_field = tk.Entry(
-            self, textvariable=self.__variables['goniec_port'])
+            frame, textvariable=self.__variables['goniec_port'])
         # fifth row, fifth column, aligned to the left
         goniec_port_field.grid(
-            row=4, column=4, sticky=tk.W)
+            row=0, column=4, sticky=tk.W+tk.E)
         # Goniec test button
         goniec_test_btn = tk.Button(
             self, text='Test Gońca',
@@ -392,6 +405,7 @@ class BiddingGUI(tk.Frame):
 
         # aggregate all widgets for which goniec_checkbox toggles status
         self.__goniec_widgets = [
+            goniec_force_checkbox,
             goniec_host_label, goniec_host_field,
             goniec_port_label, goniec_port_field,
             goniec_test_btn]
