@@ -171,7 +171,7 @@ class JFRBidding(object):
             if file_hash != hash_file(file_path):
                 changed_paths.append(file_path)
             else:
-                log.getLogger('hash').info('file not changed: %s', file_path)
+                log.getLogger('hash').debug('file not changed: %s', file_path)
         return changed_paths
 
     def __format_bidding(self, bidding):
