@@ -88,6 +88,8 @@ Opis argumentów:
  * `-f PLIK`, `--log-file PLIK`: ścieżka pliku logów
  * `-s [GONIEC]`, `--send-files [GONIEC]`: włącza transmisję Gońcem
 (domyślny adres: `localhost:8090`)
+ * `-fs`, `--force-resend`: wymusza przesłanie wszystkich edytowanych plików,
+nie tylko tych zmienionych
 
 Użycie (wersja z interfejsem okienkowym)
 ----------------------------------------

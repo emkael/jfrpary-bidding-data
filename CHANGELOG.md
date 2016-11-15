@@ -2,6 +2,16 @@
 JFR Pary - dane licytacji: lista zmian
 ======================================
 
+1.1rc2 (2016-11-15)
+* poprawki kompilacji na różnych systemach (pieprzony PyInstaller)
+* poprawki pozycjonowania CSS w Firefoksie
+* poprawki operacji na niepełnych plikach (sprawdzenia ścieżek)
+* możliwość ręcznej edycji pól tekstowych ścieżek
+* poprawki zapamiętywania konfiguracji
+* separacja CSS do osobnego pliku, dołączanego do plików HTML
+* dodanie obsługi wysyłania Gońcem jedynie zmienionych plików (z opcją
+  wymuszenia)
+
 1.1rc1 (2016-10-24)
 * obsługa Gońca
 * zapamiętywanie wypełnionych wartości (ścieżek + konf. Gońca)

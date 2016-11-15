@@ -125,6 +125,12 @@ do przodu, gdybym miał określić, w której wersji projekt buduje się
 bez problemu, musiałbym ponownie użyć: `¯\_(ツ)_/¯` - czasem działa 2.2.1
 z ręcznym patchem na problemy wymienione powyżej, czasem 3.3, ostatnio działała
 3.3.dev0+b78bfe5
+* "ostatnio" również w/w wersja "działała", ale kompilowane EXE nie uruchamiało
+się pod niektórymi systemami (cześć, Olo), z racji błędu wprowadzonego gdzieś
+około wersji 3.2; po cofnięciu do 3.1, PyInstaller nie radził sobie, gdy katalog
+roboczy `build` nie był pusty (próby nadpisywania własnych plików `.egg`) oraz
+losowo nie udaje mu się aktualizować metadanych kompilowanego EXE (częściej niż
+rzadziej)
 
 Kod żródłowy
 ------------
