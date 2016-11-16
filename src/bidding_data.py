@@ -654,7 +654,12 @@ def main():
                                  default=None, const='localhost:8090')
     argument_parser.add_argument('-fs', '--force-resend', action='store_true',
                                  help='force resending all files with Goniec')
-
+    argument_parser.add_argument('-sn', '--section-number', metavar='SECTION',
+                                 help='section number to read from',
+                                 type=int, nargs='?', default=0)
+    argument_parser.add_argument('-mr', '--max-round', metavar='MAX_ROUND',
+                                 help='max round number to read from',
+                                 type=int, nargs='?', default=sys.maxint)
     arguments = argument_parser.parse_args()
 
     # primary logging facility - virtual_table.log file
@@ -678,7 +683,9 @@ def main():
     try:
         bidding_parser = JFRBidding(
             bws_file=arguments.bws_file,
-            file_prefix=arguments.path
+            file_prefix=arguments.path,
+            section_number=arguments.section_number,
+            max_round=arguments.max_round
         )
         bidding_parser.setup_goniec(
             goniec_setup=arguments.send_files,
