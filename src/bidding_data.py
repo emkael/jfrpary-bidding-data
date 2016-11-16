@@ -390,11 +390,13 @@ class JFRBidding(object):
                 'file_hashes': {}, 'force_resend': False}
 
     def __init__(self, bws_file, file_prefix,
-                 section_number=0, max_round=sys.maxint):
+                 section_number=0, max_round=0):
         """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
         with pypyodbc.win_connect_mdb(bws_file) as connection:
             cursor = connection.cursor()
+            if max_round == 0:
+                max_round = sys.maxint
             criteria_string = ' WHERE '
             criteria_string += 'Section = %d' % section_number \
                                if section_number > 0 else '1 = 1'
