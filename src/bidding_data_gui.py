@@ -30,10 +30,12 @@ class BiddingGUI(tk.Frame):
 
     # Tk variables to bind widget values
     __variables = {}
-    # widgets which are toggled in Goniec settings panel
-    __goniec_widgets = []
-    # widgets which are toggled in advanced settings panel
-    __advanced_widgets = []
+    __grouped_widgets = {
+        # widgets which are toggled in Goniec settings panel
+        'goniec': [],
+        # widgets which are toggled in advanced settings panel
+        'advanced': []
+    }
 
     def run_bidding_data(self):
         """
@@ -63,9 +65,9 @@ class BiddingGUI(tk.Frame):
             # do the magic
             from bidding_data import JFRBidding
             section_letter = self.__variables['section'].get()
-            section_number = 0 \
-                             if section_letter == ' ' \
-                                else ord(section_letter) - ord('A') + 1
+            section_number = 0 if section_letter == ' ' else (
+                ord(section_letter) - ord('A') + 1
+            )
             parser = JFRBidding(
                 bws_file=self.__variables['bws_filename'].get(),
                 file_prefix=self.__variables['tour_filename'].get(),
@@ -150,7 +152,7 @@ class BiddingGUI(tk.Frame):
 
     def toggle_goniec(self):
         """Toggle state for Goniec-related controls on Goniec switch toggle."""
-        for control in self.__goniec_widgets:
+        for control in self.__grouped_widgets['goniec']:
             self.queue(
                 control.__setitem__, 'state',
                 tk.NORMAL if self.__variables['goniec_enabled'].get() == 1
@@ -158,8 +160,8 @@ class BiddingGUI(tk.Frame):
             )
 
     def toggle_advanced(self):
-        """Toggle state for advanced options controls on advanced switch toggle."""
-        for control in self.__advanced_widgets:
+        """Toggle state for advanced options controls on advanced switch."""
+        for control in self.__grouped_widgets['advanced']:
             self.queue(
                 control.__setitem__, 'state',
                 tk.NORMAL if self.__variables['advanced_enabled'].get() == 1
@@ -429,7 +431,7 @@ class BiddingGUI(tk.Frame):
             row=4, column=5)
 
         # aggregate all widgets for which goniec_checkbox toggles status
-        self.__goniec_widgets = [
+        self.__grouped_widgets['goniec'] = [
             goniec_force_checkbox,
             goniec_host_label, goniec_host_field,
             goniec_port_label, goniec_port_field,
@@ -471,7 +473,7 @@ class BiddingGUI(tk.Frame):
         round_field.grid(row=0, column=3, sticky=tk.W)
 
         # aggregate all widgets for which goniec_checkbox toggles status
-        self.__advanced_widgets = [
+        self.__grouped_widgets['advanced'] = [
             section_label, section_list,
             round_label, round_field,
         ]
