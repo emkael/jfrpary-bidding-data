@@ -12,6 +12,7 @@ import logging as log
 import os
 import Queue
 import socket
+import sys
 import threading
 import tkFileDialog
 import tkMessageBox
@@ -155,6 +156,36 @@ class BiddingGUI(tk.Frame):
                 tk.NORMAL if self.__variables['goniec_enabled'].get() == 1
                 else tk.DISABLED
             )
+
+    def send_resources(self):
+        """Send static resources for bidding data via Goniec."""
+        goniec = self.__compile_goniec_params()
+        if goniec is not None:
+            try:
+                goniec = goniec.split(':')
+                client = socket.socket()
+                client.connect((goniec[0], int(goniec[1])))
+                log.getLogger('goniec').info(
+                    'connected to Goniec at %s:%s',
+                    goniec[0], goniec[1])
+                resources = [
+                    os.path.join('css', 'bidding.css'),
+                    os.path.join('javas', 'bidding.js'),
+                    os.path.join('images', 'link.png')
+                ]
+                goniec_content = [
+                    os.path.dirname(
+                        os.path.realpath(sys.argv[0])
+                    ) + os.path.sep
+                ] + resources + ['bye', '']
+                for line in goniec_content:
+                    log.getLogger('goniec').info(
+                        'sending: %s', line)
+                client.sendall('\n'.join(goniec_content))
+                client.close()
+            except socket.error as err:
+                log.getLogger('goniec').error(
+                    'unable to connect to Goniec: %s', err)
 
     def toggle_advanced(self):
         """Toggle state for advanced options controls on advanced switch."""
@@ -318,7 +349,7 @@ class BiddingGUI(tk.Frame):
         # first row, label aligned to the right, text field expands
         tour_label.grid(row=0, column=0, sticky=tk.E)
         tour_entry.grid(row=0, column=1, columnspan=4, sticky=tk.E+tk.W)
-        tour_select_btn.grid(row=0, column=5)
+        tour_select_btn.grid(row=0, column=5, sticky=tk.W)
 
         # label for BWS file selection
         bws_label = tk.Label(
@@ -332,7 +363,7 @@ class BiddingGUI(tk.Frame):
         # second row, label aligned to the right, text field expands
         bws_label.grid(row=1, column=0, sticky=tk.E)
         bws_entry.grid(row=1, column=1, columnspan=4, sticky=tk.E+tk.W)
-        bws_select_btn.grid(row=1, column=5)
+        bws_select_btn.grid(row=1, column=5, sticky=tk.W)
 
         # main command button
         self.run_btn = tk.Button(
@@ -384,10 +415,12 @@ class BiddingGUI(tk.Frame):
         # fifth row, leftmost column
         goniec_checkbox.grid(
             row=4, column=0)
+
         # aggregate for Goniec controls
         frame = tk.Frame(self)
         # fifth row, second leftmost column, 1-4-1 layout
         frame.grid(row=4, column=1, columnspan=4, sticky=tk.E+tk.W)
+
         # Goniec force toggle checkbox
         goniec_force_checkbox = tk.Checkbutton(
             frame, text='Wymuś przesłanie',
@@ -419,20 +452,33 @@ class BiddingGUI(tk.Frame):
         # fifth row, fifth column, aligned to the left
         goniec_port_field.grid(
             row=0, column=4, sticky=tk.W+tk.E)
+
+        # aggregate for Goniec buttons
+        button_frame = tk.Frame(self)
+        # fifth row, rightmost column
+        button_frame.grid(
+            row=4, column=5)
         # Goniec test button
         goniec_test_btn = tk.Button(
-            self, text='Test Gońca',
+            button_frame, text='Test Gońca',
             command=self.test_goniec)
-        # fifth row, rightmost column
+        # to the left
         goniec_test_btn.grid(
-            row=4, column=5)
+            row=0, column=0)
+        # static resources send button
+        goniec_res_btn = tk.Button(
+            button_frame, text='Ślij kolorki',
+            command=self.send_resources)
+        # to the right
+        goniec_res_btn.grid(
+            row=0, column=1)
 
         # aggregate all widgets for which goniec_checkbox toggles status
         self.__grouped_widgets['goniec'] = [
             goniec_force_checkbox,
             goniec_host_label, goniec_host_field,
             goniec_port_label, goniec_port_field,
-            goniec_test_btn]
+            goniec_test_btn, goniec_res_btn]
 
     def __create_advanced_options(self):
         # advanced toggle checkbox
