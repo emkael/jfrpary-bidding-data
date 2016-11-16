@@ -131,6 +131,8 @@ około wersji 3.2; po cofnięciu do 3.1, PyInstaller nie radził sobie, gdy kata
 roboczy `build` nie był pusty (próby nadpisywania własnych plików `.egg`) oraz
 losowo nie udaje mu się aktualizować metadanych kompilowanego EXE (częściej niż
 rzadziej)
+* Avast (i być może inne antywirusy) lubią zapobiegać próbom modyfikacji
+metadanych plików EXE - błąd "Odmowa dostępu [Errno 5]"
 
 Kod żródłowy
 ------------

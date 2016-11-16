@@ -27,7 +27,7 @@ programu.
 Uwaga: paczki z sufiksem `-gui` zawierają wersję aplikacji z okienkowym
 interfejsem graficznym.
 
-W katalogu WWW Par skonfiguruj zasoby niezbędnę do prezentacji danych
+W katalogu WWW Par skonfiguruj zasoby niezbędne do prezentacji danych
 licytacji:
 * skopiuj [`css/bidding.css`](res/css/bidding.css) do katalogu WWW (plik
 dołączany jest automatycznie do stron z wynikami)
@@ -35,6 +35,9 @@ dołączany jest automatycznie do stron z wynikami)
 katalogu WWW (plik dołączany jest automatycznie do stron z wynikami)
 * skopiuj [`images/link.png`](res/images/link.png) do podkatalogu images
 katalogu WWW
+
+Wersja okienkowa potrafi również przesyłać w/w pliki Gońcem. Pliki nie są
+kopiowane do katalogu Par, ale mogą zostać prze-FTP-owane na żądanie.
 
 Już, gotowe.
 
@@ -90,6 +93,9 @@ Opis argumentów:
 (domyślny adres: `localhost:8090`)
  * `-fs`, `--force-resend`: wymusza przesłanie wszystkich edytowanych plików,
 nie tylko tych zmienionych
+ * `-sn`, `--section-number`: numer (nie litera!) sektora w BWS, do którego
+ograniczamy czytanie danych
+ * `-mr`, `--max-round`: numer ostatniej rundy, z której czytamy dane
 
 Użycie (wersja z interfejsem okienkowym)
 ----------------------------------------
