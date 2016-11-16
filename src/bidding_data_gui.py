@@ -32,6 +32,8 @@ class BiddingGUI(tk.Frame):
     __variables = {}
     # widgets which are toggled in Goniec settings panel
     __goniec_widgets = []
+    # widgets which are toggled in advanced settings panel
+    __advanced_widgets = []
 
     def run_bidding_data(self):
         """
@@ -60,9 +62,15 @@ class BiddingGUI(tk.Frame):
 
             # do the magic
             from bidding_data import JFRBidding
+            section_letter = self.__variables['section'].get()
+            section_number = 0 \
+                             if section_letter == ' ' \
+                                else ord(section_letter) - ord('A') + 1
             parser = JFRBidding(
                 bws_file=self.__variables['bws_filename'].get(),
-                file_prefix=self.__variables['tour_filename'].get())
+                file_prefix=self.__variables['tour_filename'].get(),
+                section_number=section_number,
+                max_round=self.__variables['max_round'].get())
             parser.setup_goniec(
                 goniec_setup=goniec_params,
                 goniec_force=self.__variables['goniec_forced'].get())
@@ -149,6 +157,15 @@ class BiddingGUI(tk.Frame):
                 else tk.DISABLED
             )
 
+    def toggle_advanced(self):
+        """Toggle state for advanced options controls on advanced switch toggle."""
+        for control in self.__advanced_widgets:
+            self.queue(
+                control.__setitem__, 'state',
+                tk.NORMAL if self.__variables['advanced_enabled'].get() == 1
+                else tk.DISABLED
+            )
+
     def test_goniec(self):
         """Test connectivity with Goniec and display a message accordingly."""
         goniec_socket = socket.socket()
@@ -220,7 +237,11 @@ class BiddingGUI(tk.Frame):
             'goniec_port': tk.IntVar(master=self),
             # "boolean" variables to hold checkbox states
             'goniec_enabled': tk.IntVar(master=self),
-            'goniec_forced': tk.IntVar(master=self)
+            'goniec_forced': tk.IntVar(master=self),
+            'advanced_enabled': tk.IntVar(master=self),
+            # advanced options
+            'section': tk.StringVar(master=self),
+            'max_round': tk.IntVar(master=self)
         }
 
         # set window title and icon
@@ -352,6 +373,9 @@ class BiddingGUI(tk.Frame):
         log_scroll_y.grid(row=5, column=6, sticky=tk.N+tk.S)
         log_scroll_x.grid(row=6, column=0, columnspan=6, sticky=tk.E+tk.W)
 
+        self.__create_advanced_options()
+        self.toggle_advanced()
+
     def __create_goniec_widgets(self):
         # Goniec toggle checkbox
         goniec_checkbox = tk.Checkbutton(
@@ -410,6 +434,47 @@ class BiddingGUI(tk.Frame):
             goniec_host_label, goniec_host_field,
             goniec_port_label, goniec_port_field,
             goniec_test_btn]
+
+    def __create_advanced_options(self):
+        # advanced toggle checkbox
+        advanced_checkbox = tk.Checkbutton(
+            self, text='Zaawansowane opcje',
+            command=self.toggle_advanced,
+            variable=self.__variables['advanced_enabled'])
+        # eighth row, leftmost column
+        advanced_checkbox.grid(
+            row=7, column=0)
+
+        # aggregate for advanced options
+        frame = tk.Frame(self)
+        # eighth row, second leftmost column, 1-4-1 layout
+        frame.grid(row=7, column=1, columnspan=4, sticky=tk.E+tk.W)
+
+        # label for section selection
+        section_label = tk.Label(
+            frame, text='Sektor:')
+        section_label.grid(row=0, column=0, sticky=tk.E)
+        # combobox for section selection
+        section_list = tk.OptionMenu(
+            frame, self.__variables['section'],
+            *([' '] + [chr(code) for code in range(ord('A'), ord('Z')+1)]))
+        section_list.grid(row=0, column=1, sticky=tk.W)
+        self.__variables['section'].set(' ')
+
+        # label for round number
+        round_label = tk.Label(
+            frame, text='Ostatnia runda (0=wszystkie):')
+        round_label.grid(row=0, column=2, sticky=tk.E)
+        # text field for round number
+        round_field = tk.Entry(
+            frame, textvariable=self.__variables['max_round'])
+        round_field.grid(row=0, column=3, sticky=tk.W)
+
+        # aggregate all widgets for which goniec_checkbox toggles status
+        self.__advanced_widgets = [
+            section_label, section_list,
+            round_label, round_field,
+        ]
 
     def __configure_logging(self):
         """Set up logging facility, bound to log output field."""
