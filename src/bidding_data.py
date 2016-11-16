@@ -389,8 +389,7 @@ class JFRBidding(object):
     __goniec = {'host': None, 'port': None,
                 'file_hashes': {}, 'force_resend': False}
 
-    def __init__(self, bws_file, file_prefix,
-                 goniec_setup=None, goniec_force=False):
+    def __init__(self, bws_file, file_prefix)
         """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
         with pypyodbc.win_connect_mdb(bws_file) as connection:
@@ -416,6 +415,9 @@ class JFRBidding(object):
         log.getLogger('init').debug('tournament files pattern: %s',
                                     self.__tournament_files_match.pattern)
         self.__map_board_numbers()
+
+    def setup_goniec(self, goniec_setup=None, goniec_force=False):
+        """Configure Goniec for sending files."""
         if goniec_setup is not None:
             setup_parts = goniec_setup.split(':')
             self.__goniec['host'] = setup_parts[0] if len(setup_parts) > 0 \
@@ -667,7 +669,9 @@ def main():
     try:
         bidding_parser = JFRBidding(
             bws_file=arguments.bws_file,
-            file_prefix=arguments.path,
+            file_prefix=arguments.path
+        )
+        bidding_parser.setup_goniec(
             goniec_setup=arguments.send_files,
             goniec_force=arguments.force_resend
         )

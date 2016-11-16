@@ -62,7 +62,8 @@ class BiddingGUI(tk.Frame):
             from bidding_data import JFRBidding
             parser = JFRBidding(
                 bws_file=self.__variables['bws_filename'].get(),
-                file_prefix=self.__variables['tour_filename'].get(),
+                file_prefix=self.__variables['tour_filename'].get())
+            parser.setup_goniec(
                 goniec_setup=goniec_params,
                 goniec_force=self.__variables['goniec_forced'].get())
             changed_files = []
