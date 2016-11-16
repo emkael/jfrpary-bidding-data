@@ -57,10 +57,7 @@ class BiddingGUI(tk.Frame):
                 raise Exception('Tournament results file not found')
 
             # Goniec parameters/switches
-            goniec_params = '%s:%d' % (
-                self.__variables['goniec_host'].get(),
-                self.__variables['goniec_port'].get()
-            ) if self.__variables['goniec_enabled'].get() == 1 else None
+            goniec_params = self.__compile_goniec_params()
 
             # do the magic
             from bidding_data import JFRBidding
@@ -575,6 +572,12 @@ class BiddingGUI(tk.Frame):
         }
         json.dump(self.__default_config, file(CONFIG_FILE, 'w'),
                   sort_keys=True, indent=4)
+
+    def __compile_goniec_params(self):
+        return '%s:%d' % (
+            self.__variables['goniec_host'].get(),
+            self.__variables['goniec_port'].get()
+        ) if self.__variables['goniec_enabled'].get() == 1 else None
 
 
 def main():
