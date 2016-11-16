@@ -389,16 +389,25 @@ class JFRBidding(object):
     __goniec = {'host': None, 'port': None,
                 'file_hashes': {}, 'force_resend': False}
 
-    def __init__(self, bws_file, file_prefix)
+    def __init__(self, bws_file, file_prefix,
+                 section_number=0, max_round=sys.maxint):
         """Construct parser object."""
         log.getLogger('init').debug('reading BWS file: %s', bws_file)
         with pypyodbc.win_connect_mdb(bws_file) as connection:
             cursor = connection.cursor()
+            criteria_string = ' WHERE '
+            criteria_string += 'Section = %d' % section_number \
+                               if section_number > 0 else '1 = 1'
+            criteria_string += ' AND Round <= %d' % max_round
             self.__lineup_data = cursor.execute(
-                'SELECT * FROM RoundData').fetchall()
-            bid_data = cursor.execute('SELECT * FROM BiddingData').fetchall()
+                'SELECT * FROM RoundData' + criteria_string
+            ).fetchall()
+            bid_data = cursor.execute(
+                'SELECT * FROM BiddingData' + criteria_string
+            ).fetchall()
             erased_boards = cursor.execute(
-                'SELECT * FROM ReceivedData WHERE Erased').fetchall()
+                'SELECT * FROM ReceivedData ' + criteria_string + ' AND Erased'
+            ).fetchall()
         log.getLogger('init').debug('parsing lineup data (%d entries)',
                                     len(self.__lineup_data))
         self.__round_lineups = parse_lineup_data(self.__lineup_data)
