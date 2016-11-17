@@ -2,6 +2,12 @@
 JFR Pary - dane licytacji: lista zmian
 ======================================
 
+1.1rc3 (2016-11-17)
+* możliwość ograniczenia odczytu danych do konkretnego sektora
+* możliwość ograniczenia maksymalnej rundy, dla której czytane są dane
+* wypychanie plików statycznych (CSS, JS, PNG) przez Gońca z poziomu GUI
+* wpinanie CSS jako osobny arkusz + poprawki pozycjonowania linku
+
 1.1rc2 (2016-11-15)
 * poprawki kompilacji na różnych systemach (pieprzony PyInstaller)
 * poprawki pozycjonowania CSS w Firefoksie
