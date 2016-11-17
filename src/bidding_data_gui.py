@@ -171,6 +171,7 @@ class BiddingGUI(tk.Frame):
                 resources = [
                     os.path.join('css', 'bidding.css'),
                     os.path.join('javas', 'bidding.js'),
+                    os.path.join('javas', 'jquery.js'),
                     os.path.join('images', 'link.png')
                 ]
                 goniec_content = [
