@@ -20,9 +20,8 @@ weryfikowalny w Panelu Sterowania -> Narzędziach Administracyjnych ->
 Instalacja
 ----------
 
-Ściągnij paczkę z programem, dostępną w katalogu [`bundle`](bundle) tego
-repozytorium i rozpakuj ją do wybranego przez siebie katalogu roboczego
-programu.
+Ściągnij paczkę z programem, dostępną [na stronie autora](//emkael.github.io/pary-bidding-data)
+i rozpakuj ją do wybranego przez siebie katalogu roboczego programu.
 
 Uwaga: paczki z sufiksem `-gui` zawierają wersję aplikacji z okienkowym
 interfejsem graficznym.
