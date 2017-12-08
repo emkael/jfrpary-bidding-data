@@ -20,6 +20,14 @@ from bs4 import BeautifulSoup as bs4
 __version__ = '1.1rc3'
 
 
+def isfile(file_path):
+    """Check if a path describes a file.
+
+    Accepts symlinks to files, and does not fail for network drivers.
+    """
+    return path.exists(file_path) and not path.isdir(file_path)
+
+
 def hash_file(file_path, block=65536):
     """Return MD5 hash of a specified file."""
     if path.exists(file_path):
@@ -341,7 +349,7 @@ class JFRBidding(object):
                     bidding_link['data-bidding-link'] = path.basename(
                         bidding_path)
                     # only append link if we've got bidding data
-                    if path.isfile(path.join(
+                    if isfile(path.join(
                             path.dirname(self.__tournament_prefix),
                             bidding_link['data-bidding-link'])):
                         if bidding_path in self.__bidding_files:
@@ -618,7 +626,7 @@ def main():
     def file_path(filepath):
         """Sanitize and validate file paths from input parameters."""
         filepath = unicode(filepath, sys.getfilesystemencoding())
-        if path.isfile(filepath):
+        if isfile(filepath):
             return filepath
         else:
             argument_parser.error('File %s does not exist' % filepath)
