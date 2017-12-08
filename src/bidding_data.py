@@ -111,9 +111,9 @@ def parse_bidding_data(bidding_data, erased_boards=None):
         round_no = bid[3]
         table_no = str(bid[1]) + '_' + str(bid[2])
         board_no = str(bid[4]) + '_' + str(round_no) + '_' + table_no
+        bid_counter = bid[5]
         if (board_no not in erased or
                 erased[board_no] < merge_timestamps(bid[8], bid[9])):
-            bid_counter = bid[5]
             bid_erased = bid[10]
             if board_no not in bids:
                 bids[board_no] = {}
