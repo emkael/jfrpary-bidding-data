@@ -337,12 +337,14 @@ class JFRBidding(object):
             used_files = []
             for row in board_text_content.select('tr'):
                 cells = row.select('td')
-                debug_string = ' '.join([
-                    ''.join([
-                        cc for cc
-                        in c.contents if isinstance(cc, basestring)]).strip()
-                    for c in cells])
-                log.getLogger('links').debug('row: %s', debug_string)
+                log.getLogger('links').debug(
+                    'row: %s',
+                    ' '.join([
+                        ''.join([
+                            cc for cc
+                            in c.contents if isinstance(cc, basestring)
+                        ]).strip()
+                        for c in cells]))
                 # traveller table rows for specific score entries
                 # should have 11 cells
                 if len(cells) == 11:
