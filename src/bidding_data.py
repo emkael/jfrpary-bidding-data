@@ -8,10 +8,11 @@ by JFR Pary.
 import glob
 import logging as log
 import hashlib
+import json
 import re
 import socket
 import sys
-from os import path, remove
+from os import mkdir, path, remove, sep
 
 import pypyodbc
 
@@ -163,6 +164,12 @@ def get_last_bidder(bidding):
     return bidding[max(bidding.keys())]['direction']
 
 
+def filter_scripts(header_scripts, name):
+    """Return specific scripts from among script tag list."""
+    return [script for script in header_scripts
+            if script['src'] == name]
+
+
 class JFRBidding(object):
     """Bidding data converter (from BWS data to JFR HTML pages)."""
 
@@ -210,24 +217,33 @@ class JFRBidding(object):
                     bid_cell.append(bid)
                 bidding_row.append(bid_cell)
             log.getLogger('b_format').debug('%5s' * 4, *bid_round)
-        return html_output.table.prettify()
+        return unicode(html_output.table)
 
     def __get_bidding_file_output_path(self,
                                        board_no,
-                                       round_no=None,
-                                       table_no=None,
-                                       pair_numbers=None):
+                                       pair_numbers=None,
+                                       position_info=(None, None),
+                                       compressed=False):
         """
         Compile file path for bidding data (HTML file with bidding).
 
         Path format: {prefix}_bidding_{jfr_board_number}_{pair_numbers}.txt
+        Compressed path format: {prefix}_bidding_{jfr_board_number}.json
         """
-        if pair_numbers is None:
-            # read numbers from lineup
-            pair_numbers = self.__round_lineups[round_no][table_no]
-        return u'{0}_bidding_{1:03}_{2}.txt'.format(
-            self.__tournament_prefix, board_no,
-            '_'.join([str(num) for num in pair_numbers]))
+        if compressed:
+            return path.join(
+                path.dirname(self.__tournament_prefix),
+                'bidding-data',
+                u'{0}_bidding_{1:03}.json'.format(
+                    path.basename(self.__tournament_prefix), board_no))
+        else:
+            if pair_numbers is None:
+                # read numbers from lineup
+                (round_no, table_no) = position_info
+                pair_numbers = self.__round_lineups[round_no][table_no]
+            return u'{0}_bidding_{1:03}_{2}.txt'.format(
+                self.__tournament_prefix, board_no,
+                '_'.join([str(num) for num in pair_numbers]))
 
     def __map_board_numbers(self):
         """
@@ -346,12 +362,10 @@ class JFRBidding(object):
                     bidding_path = self.__get_bidding_file_output_path(
                         int(file_number, 10),
                         pair_numbers=pair_numbers)
-                    bidding_link['data-bidding-link'] = path.basename(
-                        bidding_path)
+                    bidding_link['data-bidding-link'] = '_'.join(
+                        [str(pair) for pair in pair_numbers])
                     # only append link if we've got bidding data
-                    if isfile(path.join(
-                            path.dirname(self.__tournament_prefix),
-                            bidding_link['data-bidding-link'])):
+                    if isfile(bidding_path):
                         if bidding_path in self.__bidding_files:
                             used_files.append(bidding_path)
                         log.getLogger('links').info(
@@ -374,6 +388,33 @@ class JFRBidding(object):
                 'utf-8', formatter='html'))
             board_text.truncate()
             return used_files
+
+    def __link_compressed_bidding_file(self, traveller_file, bidding_file):
+        """Put <link> markup for compressed bidding file in a traveller."""
+        if traveller_file in self.__tournament_files:
+            with file(traveller_file, 'r+') as traveller_html:
+                traveller = bs4(traveller_html, 'lxml')
+                for link in traveller.findAll('link', rel='bidding-file'):
+                    link.extract()
+                bidding_scripts = filter_scripts(
+                    traveller.select('head script'), 'javas/bidding.js')
+                if len(bidding_scripts) < 0:
+                    log.getLogger('compress').warning(
+                        'traveller file %s lacks bidding JavaScript, skipping',
+                        traveller_file)
+                else:
+                    bidding_data_tag = traveller.new_tag('link')
+                    bidding_data_tag['rel'] = 'bidding-file'
+                    bidding_data_tag['src'] = path.relpath(
+                        bidding_file, path.dirname(traveller_file)
+                    ).replace(sep, '/')
+                    bidding_scripts[0].insert_after(bidding_data_tag)
+                    traveller_html.seek(0)
+                    traveller_html.write(traveller.prettify(
+                        'utf-8', formatter='html'))
+        else:
+            log.getLogger('compress').warning(
+                'traveller file %s not registered, skipping', traveller_file)
 
     # sitting read from BWS
     __round_lineups = {}
@@ -469,7 +510,7 @@ class JFRBidding(object):
                                 bidding_fpath = \
                                     self.__get_bidding_file_output_path(
                                         self.__board_number_mapping[board_no],
-                                        round_no, table_no)
+                                        position_info=(round_no, table_no))
                                 self.__bidding_files.append(bidding_fpath)
                                 self.__store_file_hash(bidding_fpath)
                                 with file(bidding_fpath, 'w') as bidding_file:
@@ -501,8 +542,8 @@ class JFRBidding(object):
                 board_content = bs4(board_html, 'lxml', from_encoding='utf-8')
                 header_scripts = board_content.select('head script')
                 # check for jQuery, append if necessary
-                jquery_scripts = [script for script in header_scripts
-                                  if script['src'] == 'javas/jquery.js']
+                jquery_scripts = filter_scripts(
+                    header_scripts, 'javas/jquery.js')
                 if not len(jquery_scripts):
                     jquery = board_content.new_tag(
                         'script', src='javas/jquery.js',
@@ -511,9 +552,8 @@ class JFRBidding(object):
                     board_content.head.append(jquery)
                     log.getLogger('scripts').debug('jQuery not found, adding')
                 # check for bidding.js
-                bidding_scripts = [
-                    script for script in header_scripts
-                    if script['src'] == 'javas/bidding.js']
+                bidding_scripts = filter_scripts(
+                    header_scripts, 'javas/bidding.js')
                 log.getLogger('scripts').debug('found %d bidding.js scripts',
                                                len(bidding_scripts))
                 # and make sure bidding.js is appended after jQuery
@@ -576,6 +616,48 @@ class JFRBidding(object):
                 log.getLogger('links').warning(
                     'bidding file %s does not exist', unused_file)
         return used_board_files
+
+    def compress_bidding_files(self):
+        """Compile all *.txt for a traveller into a single *.json file."""
+        output_directory = path.join(
+            path.dirname(self.__tournament_prefix),
+            'bidding-data'
+        )
+        if not path.exists(output_directory):
+            try:
+                mkdir(output_directory)
+            except OSError:
+                log.getLogger('compress').error(
+                    'unable to create directory for bidding-data: %s',
+                    output_directory)
+                return []
+        compressed_files = []
+        for traveller in self.__tournament_files:
+            traveller_match = re.match(
+                self.__tournament_files_match, traveller)
+            if traveller_match:
+                board_number = int(traveller_match.group(1), 10)
+                compressed_file_path = self.__get_bidding_file_output_path(
+                    board_number, compressed=True)
+                board_file_prefix = path.basename(
+                    compressed_file_path).split('.')[0]
+                board_files = [filename for
+                               filename in self.__bidding_files
+                               if path.exists(filename) and
+                               path.basename(filename).startswith(
+                                   board_file_prefix)]
+                compressed_board = {}
+                for board_file in board_files:
+                    compressed_board[
+                        '_'.join(board_file.split('.')[-2].split('_')[-2:])
+                    ] = file(board_file).read()
+                json.dump(compressed_board, file(compressed_file_path, 'w'))
+                for board_file in board_files:
+                    remove(board_file)
+                compressed_files.append(compressed_file_path)
+                self.__link_compressed_bidding_file(
+                    traveller, compressed_file_path)
+        return compressed_files
 
     def send_changed_files(self, files_to_send):
         """Send specified files from working directory via Goniec."""
@@ -701,10 +783,11 @@ def main():
             goniec_setup=arguments.send_files,
             goniec_force=arguments.force_resend
         )
+        bidding_parser.write_bidding_tables()
         all_files = []
-        all_files += bidding_parser.write_bidding_tables()
         all_files += bidding_parser.write_bidding_scripts()
         all_files += bidding_parser.write_bidding_links()
+        all_files += bidding_parser.compress_bidding_files()
         bidding_parser.send_changed_files(all_files)
     except Exception as ex:
         log.getLogger('root').error(ex)
