@@ -121,9 +121,11 @@ class BiddingGUI(tk.Frame):
         Displays file selection dialog for tournament file and stores user's
         choice in Tk variable.
         """
-        self.__variables['tour_filename'].set(tkFileDialog.askopenfilename(
+        filename = tkFileDialog.askopenfilename(
             title='Wybierz główny plik wyników turnieju',
-            filetypes=[('HTML files', '.htm*'), ('all files', '.*')]))
+            filetypes=[('HTML files', '.htm*'), ('all files', '.*')])
+        if filename is not None and len(filename) > 0:
+            self.__variables['tour_filename'].set(filename)
 
     def bws_select(self):
         """
@@ -133,9 +135,11 @@ class BiddingGUI(tk.Frame):
         Displays file selection dialog for tournament file and stores user's
         choice in Tk variable.
         """
-        self.__variables['bws_filename'].set(tkFileDialog.askopenfilename(
+        filename = tkFileDialog.askopenfilename(
             title='Wybierz plik z danymi licytacji',
-            filetypes=[('BWS files', '.bws'), ('all files', '.*')]))
+            filetypes=[('BWS files', '.bws'), ('all files', '.*')])
+        if filename is not None and len(filename) > 0:
+            self.__variables['bws_filename'].set(filename)
 
     def display_info(self):
         """Show application "About" box."""
