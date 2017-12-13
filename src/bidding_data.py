@@ -18,7 +18,7 @@ import pypyodbc
 
 from bs4 import BeautifulSoup as bs4
 
-__version__ = '1.1rc3'
+__version__ = '1.2rc1'
 
 
 def isfile(file_path):
