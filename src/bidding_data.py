@@ -650,11 +650,17 @@ class JFRBidding(object):
                                    board_file_prefix)]
                 compressed_board = {}
                 for board_file in board_files:
+                    log.getLogger('compress').info(
+                        'compressing file %s', board_file)
                     compressed_board[
                         '_'.join(board_file.split('.')[-2].split('_')[-2:])
                     ] = file(board_file).read()
+                log.getLogger('compress').info(
+                    'writing compressed file %s', compressed_file_path)
                 json.dump(compressed_board, file(compressed_file_path, 'w'))
                 for board_file in board_files:
+                    log.getLogger('compress').info(
+                        'removing file %s', board_file)
                     remove(board_file)
                 compressed_files.append(compressed_file_path)
                 self.__link_compressed_bidding_file(
