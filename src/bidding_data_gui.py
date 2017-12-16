@@ -74,10 +74,11 @@ class BiddingGUI(tk.Frame):
             parser.setup_goniec(
                 goniec_setup=goniec_params,
                 goniec_force=self.__variables['goniec_forced'].get())
+            parser.write_bidding_tables()
             changed_files = []
-            changed_files += parser.write_bidding_tables()
             changed_files += parser.write_bidding_scripts()
             changed_files += parser.write_bidding_links()
+            changed_files += parser.compress_bidding_files()
             if self.__variables['goniec_enabled'].get() == 1:
                 parser.send_changed_files(changed_files)
 
