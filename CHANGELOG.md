@@ -2,6 +2,13 @@
 JFR Pary - dane licytacji: lista zmian
 ======================================
 
+1.2rc1 (2017-12-16)
+* usprawnienia wydajności wyświetlania komunikatów w wersji okienkowej
+* zmiana formatu wyświetlania tabelek licytacji (w tabeli protkołu zamiast
+  nad tabelą
+* kompilacja plików z licytacją do jednego na protokół
+* poprawki błędów (np. tracenia ścieżki wpisanej w pola wyboru plików)
+
 1.1rc3 (2016-11-17)
 * możliwość ograniczenia odczytu danych do konkretnego sektora
 * możliwość ograniczenia maksymalnej rundy, dla której czytane są dane
