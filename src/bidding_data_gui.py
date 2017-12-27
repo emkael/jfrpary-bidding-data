@@ -15,6 +15,7 @@ import Queue
 import socket
 import sys
 import threading
+import time
 import tkFileDialog
 import tkMessageBox
 
@@ -520,6 +521,7 @@ class BiddingGUI(tk.Frame):
                 self.__messages_mutex = Lock()
                 self.__messages = []
                 self.__messages_to_output = []
+                self.__message_loop = False
                 self.text.master.queue(self.__output)
 
             def emit(self, record):
@@ -541,14 +543,17 @@ class BiddingGUI(tk.Frame):
                 self.__messages_mutex.acquire()
                 self.__messages_to_output = copy.copy(self.__messages)
                 self.__messages = []
-                self.__messages_mutex.release()
                 if len(self.__messages_to_output) > 0:
                     msg = '\n'.join(self.__messages_to_output).encode('utf8')
                     # Append message to the Text widget, at the end."""
                     self.text.master.queue(self.text.insert, tk.END, msg + '\n')
                     # scroll to the bottom, afterwards
                     self.text.master.queue(self.text.yview, tk.END)
-                self.text.master.queue(self.__output)
+                else:
+                    time.sleep(0.05)
+                self.__messages_mutex.release()
+                if self.__message_loop:
+                    self.text.master.queue(self.__output)
 
             # message stats, for summary purposes
             __warning_count = 0
@@ -567,10 +572,12 @@ class BiddingGUI(tk.Frame):
                 self.__messages_mutex.acquire()
                 self.__messages_to_output = []
                 self.__messages = []
+                self.__message_loop = True
                 self.__messages_mutex.release()
                 self.__warning_count = 0
                 self.__error_count = 0
                 self.text.master.queue(self.text.delete, 1.0, tk.END)
+                self.text.master.queue(self.__output)
 
             def print_summary(self):
                 self.__messages_mutex.acquire()
@@ -593,6 +600,7 @@ class BiddingGUI(tk.Frame):
                     self.__messages.append(self.text.insert, tk.END,
                                            'Wszystko wporzo.\n')
                     self.text.master.queue(res.play, 'success')
+                self.__message_loop = False
                 self.__messages_mutex.release()
 
 
