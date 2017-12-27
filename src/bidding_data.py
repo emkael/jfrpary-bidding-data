@@ -701,7 +701,7 @@ class JFRBidding(object):
                             'sent file to Goniec: %s', file_sent)
                 except socket.error as err:
                     log.getLogger('goniec').error(
-                        'unable to connect to Goniec: %s', err)
+                        'unable to connect to Goniec: %d', err.errno)
             else:
                 log.getLogger('goniec').info('nothing to send')
 

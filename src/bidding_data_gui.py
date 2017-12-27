@@ -543,8 +543,10 @@ class BiddingGUI(tk.Frame):
                 self.__messages_mutex.acquire()
                 self.__messages_to_output = copy.copy(self.__messages)
                 self.__messages = []
+                for m in self.__messages_to_output:
+                    print m
                 if len(self.__messages_to_output) > 0:
-                    msg = '\n'.join(self.__messages_to_output).encode('utf8')
+                    msg = '\n'.join(self.__messages_to_output)
                     # Append message to the Text widget, at the end."""
                     self.text.master.queue(self.text.insert, tk.END, msg + '\n')
                     # scroll to the bottom, afterwards
@@ -586,14 +588,14 @@ class BiddingGUI(tk.Frame):
                     self.__messages.append(
                         ('Podczas wykonywania programu wystąpiły błędy ' +
                          'w liczbie: %d\n' +
-                         'Sprawdź dziennik logów\n').decode('utf8')
+                         'Sprawdź dziennik logów\n').decode('utf-8')
                         % self.errors())
                     self.text.master.queue(res.play, 'error')
                 elif self.warnings():
                     self.__messages.append(
                         ('Podczas wykonywania programu wystąpiły ' +
                          'ostrzeżenia w liczbie: %d\n' +
-                         'Sprawdź dziennik logów\n').decode('utf8')
+                         'Sprawdź dziennik logów\n').decode('utf-8')
                         % self.warnings())
                     self.text.master.queue(res.play, 'warning')
                 else:
