@@ -641,6 +641,7 @@ class JFRBidding(object):
                 board_number = int(traveller_match.group(1), 10)
                 compressed_file_path = self.__get_bidding_file_output_path(
                     board_number, compressed=True)
+                self.__store_file_hash(compressed_file_path)
                 board_file_prefix = path.basename(
                     compressed_file_path).split('.')[0]
                 board_files = [filename for
