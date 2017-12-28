@@ -599,8 +599,7 @@ class BiddingGUI(tk.Frame):
                         % self.warnings())
                     self.text.master.queue(res.play, 'warning')
                 else:
-                    self.__messages.append(self.text.insert, tk.END,
-                                           'Wszystko wporzo.\n')
+                    self.__messages.append('Wszystko wporzo.\n')
                     self.text.master.queue(res.play, 'success')
                 self.__message_loop = False
                 self.__messages_mutex.release()
