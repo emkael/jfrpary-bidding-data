@@ -30,7 +30,7 @@ W katalogu WWW Par skonfiguruj zasoby niezbędne do prezentacji danych
 licytacji:
 * skopiuj [`css/bidding.css`](res/css/bidding.css) do katalogu WWW (plik
 dołączany jest automatycznie do stron z wynikami)
-* skopiuj [`javas/bidding.js`](res/javas/bidding.js) do podkatalogu javas
+* skopiuj [`javas/bidding.js`](res/javas/bidding.js) i [`javas/jquery.js`](res/javas/jquery.js) do podkatalogu javas
 katalogu WWW (plik dołączany jest automatycznie do stron z wynikami)
 * skopiuj [`images/link.png`](res/images/link.png) do podkatalogu images
 katalogu WWW
