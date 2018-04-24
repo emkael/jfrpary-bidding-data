@@ -328,6 +328,22 @@ class JFRBidding(object):
         # aligning it row-by-row (bid round-by-round)
         return [list(row) for row in zip(*bidding_table)]
 
+    def __get_individual_pair_numbers(self, pair_numbers, board_number):
+        """
+        Filter participant numbers.
+
+        Match numbers specified in round data.
+        """
+        bws_boards = []
+        for bws_board in self.__board_number_mapping:
+            if self.__board_number_mapping[bws_board] == board_number:
+                bws_boards.append(bws_board.split('_')[1:])
+        for table in bws_boards:
+            lineup = self.__round_lineups[int(table[0])]['_'.join(table[1:])]
+            if set(lineup).issubset(set(pair_numbers)):
+                return lineup
+        return pair_numbers
+
     def __write_bidding_file(self, board_text_path, file_number):
         """Alter traveller file to include links to bidding tables."""
         self.__store_file_hash(board_text_path)
@@ -350,10 +366,22 @@ class JFRBidding(object):
                 if len(cells) == 11:
                     try:
                         pair_numbers = sorted([
-                            int(cells[1].contents[0]),
-                            int(cells[2].contents[0])])
+                            int(cell) for cell in
+                            cells[1].contents[0].split('-') \
+                            + cells[2].contents[0].split('-')
+                        ])
                         log.getLogger('links').debug(
                             'pairs: %s', pair_numbers)
+                        if len(pair_numbers) > 2:
+                            # individual event
+                            # must determine which numbers are in round data
+                            mapped_numbers = self.__get_individual_pair_numbers(
+                                pair_numbers, int(file_number, 10))
+                            log.getLogger('links').info(
+                                'individual contestant numbers %s mapped ' \
+                                + 'to BWS pair numbers: %s',
+                                pair_numbers, mapped_numbers)
+                            pair_numbers = mapped_numbers
                     except ValueError:
                         log.getLogger('links').debug(
                             'invalid pair numbers, skipping')
