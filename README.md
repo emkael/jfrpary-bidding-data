@@ -114,6 +114,11 @@ dostępna jest w gałęzi [csv](//github.com/emkael/jfrpary-bidding-data/tree/cs
 Do wersji z gałęzi CSV nie ma interfejsu graficznego. Wersja z gałęzi CSV
 została porzucona w wersji ok. 1.0, z czystego lenistwa.
 
+Rozwiązywanie problemów
+-----------------------
+
+Patrz: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
 Lista przyszłych usprawnień
 ---------------------------
 
